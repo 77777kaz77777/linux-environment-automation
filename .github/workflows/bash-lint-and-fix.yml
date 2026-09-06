@@ -36,8 +36,8 @@ jobs:
 
       - name: Auto-apply ShellCheck fixes (SC2129, SC2181, SC2162)
         run: |
-          # Generates a patch file for all fixable ShellCheck issues (like redirects, exit codes, and read flags)
-          find . -type f -name "*.sh" -exec shellcheck -f diff {} + > shellcheck-fixes.patch
+          # Adding '|| true' prevents the pipeline from crashing. ShellCheck returns exit code 1 when it finds issues, which triggers GitHub Actions' default 'set -e' fail-fast behavior before the patch can apply.
+          find . -type f -name "*.sh" -exec shellcheck -f diff {} + > shellcheck-fixes.patch || true
           
           # Applies the patch automatically if fixes were found
           if [ -s shellcheck-fixes.patch ]; then

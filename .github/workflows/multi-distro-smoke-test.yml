@@ -1,0 +1,64 @@
+name: Multi-Distribution Smoke Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    name: Test on ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Fedora
+            image: fedora:latest
+            install: dnf install -y --refresh python3 python3-pip git bash findutils
+          - name: Debian
+            image: debian:latest
+            install: apt-get update && apt-get install -y python3 python3-pip git bash findutils
+          - name: Alpine
+            image: alpine:latest
+            install: apk add --no-cache python3 py3-pip git bash findutils
+          - name: Arch
+            image: archlinux:latest
+            install: pacman -Syu --noconfirm python git bash findutils
+
+    container:
+      image: ${{ matrix.image }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Runtime Dependencies
+        run: ${{ matrix.install }}
+
+      - name: Smoke Test All Shell Scripts (.sh)
+        run: |
+          echo "Scanning shell scripts on ${{ matrix.name }}..."
+          failed=0
+          while IFS= read -r -d '' script; do
+            echo "Checking: $script"
+            if ! bash -n "$script"; then
+              echo "❌ Syntax error found in $script"
+              failed=1
+            fi
+          done < <(find . -name "*.sh" -not -path "./node_modules/*" -print0)
+          exit $failed
+
+      - name: Smoke Test All Python Scripts (.py)
+        run: |
+          echo "Scanning Python scripts on ${{ matrix.name }}..."
+          failed=0
+          while IFS= read -r -d '' script; do
+            echo "Checking: $script"
+            if ! python3 -m py_compile "$script"; then
+              echo "❌ Compilation error found in $script"
+              failed=1
+            fi
+          done < <(find . -name "*.py" -not -path "./node_modules/*" -print0)
+          exit $failed

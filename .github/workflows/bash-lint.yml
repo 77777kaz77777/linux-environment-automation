@@ -1,4 +1,4 @@
-name: Maintain Bash Scripts
+name: Maintain and Auto-Fix Bash Scripts
 
 on:
   push:
@@ -6,25 +6,42 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  # Forces all JavaScript actions to use the Node.js 24 runtime
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
-  lint:
+  auto-fix-and-lint:
     runs-on: ubuntu-latest
+    permissions:
+      # Required for the git-auto-commit-action to push changes back
+      contents: write 
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-
-      - name: Setup Node.js 24
-        uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          # Checks out the PR branch so commits can be pushed back to it
+          ref: ${{ github.head_ref }}
 
-      - name: Install ShellCheck and shfmt
+      - name: Install dependencies (shfmt and ShellCheck)
         run: |
           sudo apt-get update
-          sudo apt-get install -y shellcheck shfmt
+          sudo apt-get install -y shfmt shellcheck
 
+      - name: Auto-format Bash scripts (shfmt)
+        run: |
+          # Find all .sh files and format them in place
+          # -w (write to file), -i 2 (indent 2 spaces), -ci (indent switch cases)
+          find . -type f -name "*.sh" -exec shfmt -w -i 2 -ci {} +
+          
+      - name: Commit formatting changes
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: auto-format bash scripts with shfmt"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          
       - name: Run ShellCheck
-        run: find . -type f -name '*.sh' -exec shellcheck {} +
-
-      - name: Run shfmt check
-        run: shfmt -d .
+        run: |
+          # Fails the pipeline if there are syntax or logic errors that shfmt cannot fix safely
+          find . -type f -name "*.sh" -exec shellcheck {} +

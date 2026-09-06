@@ -23,23 +23,25 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y shfmt shellcheck patch
+          sudo apt-get install -y shfmt shellcheck patch dos2unix
 
       - name: Auto-format Bash scripts (shfmt)
         run: |
           find . -type f -name "*.sh" -exec shfmt -w -i 2 -ci {} +
           
-      - name: Auto-fix blank lines before Shebang (SC1128)
+      - name: Auto-fix Shebang placement (SC1128)
         run: |
-          # Removes any empty lines at the very top of .sh files so the shebang is strictly on line 1
-          find . -type f -name "*.sh" -exec sed -i -e '/./,$!d' {} +
+          # 1. Convert CRLF to LF line endings. Hidden Windows carriage returns often cause standard empty-line regex matching to fail.
+          find . -type f -name "*.sh" -exec dos2unix -q {} +
+          
+          # 2. Safely locate the shebang line and strip EVERYTHING above it (spaces, hidden characters, or comments) 
+          # to guarantee #!/bin/bash is strictly on line 1.
+          find . -type f -name "*.sh" -exec bash -c 'for f; do if grep -q "^#!" "$f"; then sed -i -n "/^#!/,\$p" "$f"; fi; done' _ {} +
 
       - name: Auto-apply ShellCheck fixes (SC2129, SC2181, SC2162)
         run: |
-          # Adding '|| true' prevents the pipeline from crashing. ShellCheck returns exit code 1 when it finds issues, which triggers GitHub Actions' default 'set -e' fail-fast behavior before the patch can apply.
           find . -type f -name "*.sh" -exec shellcheck -f diff {} + > shellcheck-fixes.patch || true
           
-          # Applies the patch automatically if fixes were found
           if [ -s shellcheck-fixes.patch ]; then
             patch -p1 < shellcheck-fixes.patch
           fi
@@ -54,6 +56,4 @@ jobs:
           
       - name: Run ShellCheck (Strict Errors Only)
         run: |
-          # Fails the pipeline ONLY for critical syntax errors. 
-          # Ignores stylistic warnings (like SC2034: unused variables) to prevent manual intervention.
           find . -type f -name "*.sh" -exec shellcheck --severity=error {} +

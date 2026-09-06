@@ -26,13 +26,6 @@ A personal repository dedicated to Linux system maintenance, distro updates, ter
 | `set-login-wallpaper.sh` | Script to change and apply the display manager wallpaper. |
 
 
-### 📁 node_modules/
-
-| File | Description |
-|---|---|
-| `.package-lock.json` |  |
-
-
 ### 📁 security/ (Antivirus & system defense utilities)
 
 | File | Description |

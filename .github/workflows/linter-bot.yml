@@ -1,0 +1,43 @@
+name: Linter Bot
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  lint:
+    name: Lint Codebase
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Latest Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'latest'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Python Linters
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff yamllint
+
+      - name: Install Node.js Linters
+        run: npm install -g prettier prettier-plugin-toml
+
+      - name: Lint Python (Ruff)
+        run: ruff check .
+
+      - name: Lint YAML (yamllint)
+        run: yamllint .
+
+      - name: Lint JSON and TOML (Prettier)
+        run: prettier --check "**/*.{json,toml}"

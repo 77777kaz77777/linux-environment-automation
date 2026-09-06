@@ -34,14 +34,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install ruff yamllint
 
-      - name: Install Node.js Linters
-        run: npm install prettier
-
       - name: Auto-Fix Python (Ruff)
         run: ruff check . --fix --unsafe-fixes --exit-zero
 
       - name: Auto-Fix JSON (Prettier)
-        run: npx prettier --write "**/*.json"
+        run: npx --yes prettier --write "**/*.json"
 
       - name: Lint YAML (yamllint)
         run: yamllint . || true
@@ -50,3 +47,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: auto-fix linting and formatting errors"
+          skip_dirty_check: false

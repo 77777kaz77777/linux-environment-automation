@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # (Work in Progress) Automated Python workstation bootstrap, toolstack installer, and repository script deployment with GUI.
 import os
-import sys
-import subprocess
+import queue
 import shutil
+import subprocess
+import sys
 import tempfile
 import threading
-import queue
 import tkinter as tk
-from tkinter import ttk, scrolledtext, messagebox
 from pathlib import Path
+from tkinter import messagebox, scrolledtext, ttk
 
 LOG_FILE = "workstation_install.log"
 
@@ -249,7 +249,7 @@ class InstallerGUI(tk.Tk):
                 self.log(f"[✘] {component_name}: FAILED\n    Stderr: {result.stderr.strip()}")
                 return False
         except Exception as e:
-            self.log(f"[✘] {component_name}: ERROR -> {str(e)}")
+            self.log(f"[✘] {component_name}: ERROR -> {e!s}")
             return False
 
     def start_installation(self):

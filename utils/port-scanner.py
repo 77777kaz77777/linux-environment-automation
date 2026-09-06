@@ -1,12 +1,12 @@
 # Educational multi-threaded TCP socket scanner (College Project)
+import concurrent.futures
+import csv
+import logging
 import os
 import socket
-import concurrent.futures
-import logging
-import csv
-import nmap 
 from datetime import datetime
-import ipaddress
+
+import nmap
 
 # Commonly used ports for quick scans
 COMMON_PORTS = [80, 443, 22, 21, 25]
@@ -15,7 +15,7 @@ COMMON_PORTS = [80, 443, 22, 21, 25]
 SECURITY_PORTS = [23]  # Telnet port
 
 # Set of reserved ports (adjust as needed)
-RESERVED_PORTS = set(range(0, 1024))
+RESERVED_PORTS = set(range(1024))
 
 # Function to scan a specific port on a target
 def scan_port(target, port, filter_mode, allow_reserved_ports):
@@ -23,21 +23,19 @@ def scan_port(target, port, filter_mode, allow_reserved_ports):
         if port in RESERVED_PORTS and not allow_reserved_ports:
             return port, "skipped (User skipped Reserved Ports)"
 
-        with socket.create_connection((target, port), timeout=1) as sock:
+        with socket.create_connection((target, port), timeout=1):
             if port in SECURITY_PORTS:
                 return port, "open (Security Issue - Telnet detected)"
             else:
                 # Identify service and protocol for open ports
                 service, protocol = identify_service(target, port)
                 status = f"open ({service} service, {protocol} protocol)"
-                if filter_mode == 'open' and 'open' not in status:
-                    status = 'filtered'
-                elif filter_mode == 'closed' and 'closed' not in status:
+                if filter_mode == 'open' and 'open' not in status or filter_mode == 'closed' and 'closed' not in status:
                     status = 'filtered'
                 return port, status
     except ConnectionRefusedError:
         return port, "closed (Connection Refused)"
-    except socket.timeout:
+    except TimeoutError:
         return port, "closed (Timeout - Network Issue)"
     except Exception as e:
         return port, f"error: {e}"
@@ -60,7 +58,7 @@ def identify_service(target, port):
                 return f"{service} ({product} {version})", "TCP"
         else:
             return "Unknown", "Unknown"
-    except Exception as e:
+    except Exception:
         return "Unknown", "Unknown"
 
 # Function to check security issues on a specific port
@@ -72,7 +70,7 @@ def check_security_issues(target, port):
         issues = []
 
         if target in nm.all_hosts() and 'tcp' in nm[target]:
-            for script_id, output in nm[target]['tcp'][port]['script'].items():
+            for output in nm[target]['tcp'][port]['script'].values():
                 if 'VULNERABILITY' in output:
                     vulnerabilities = output['VULNERABILITY']
                     for vulnerability in vulnerabilities:
@@ -138,11 +136,11 @@ def validate_ip(ip):
     try:
         socket.inet_pton(socket.AF_INET, ip)
         return True
-    except socket.error:
+    except OSError:
         try:
             socket.inet_pton(socket.AF_INET6, ip)
             return True
-        except socket.error:
+        except OSError:
             return False
 
 # Function to validate a hostname
@@ -150,7 +148,7 @@ def validate_hostname(hostname):
     try:
         socket.gethostbyname(hostname)
         return True
-    except socket.error:
+    except OSError:
         return False
 
 # Function to get user-defined custom ports for scanning
@@ -302,7 +300,7 @@ def main():
         print(f"\nScanning target {target}")
         print("=" * 40)
 
-        ports_to_scan, custom_ports = get_scan_options()
+        ports_to_scan, _custom_ports = get_scan_options()
         results = []
         filter_mode = get_filter_mode()
         allow_reserved_ports = input("Allow scanning and identifying services on reserved ports? (y/n): ").lower() == 'y'

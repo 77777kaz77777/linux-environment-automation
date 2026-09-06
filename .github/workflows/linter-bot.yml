@@ -35,13 +35,13 @@ jobs:
           pip install ruff yamllint
 
       - name: Install Node.js Linters
-        run: npm install -g prettier prettier-plugin-toml
+        run: npm install prettier prettier-plugin-toml
 
       - name: Auto-Fix Python (Ruff)
         run: ruff check . --fix --unsafe-fixes --exit-zero
 
       - name: Auto-Fix JSON and TOML (Prettier)
-        run: prettier --write "**/*.{json,toml}"
+        run: npx prettier --plugin=prettier-plugin-toml --write "**/*.{json,toml}"
 
       - name: Lint YAML (yamllint)
         run: yamllint . || true

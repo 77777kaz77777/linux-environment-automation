@@ -9,7 +9,7 @@ echo "Purging old lukenukem/asus-linux COPR repository and old packages..."
 sudo dnf copr remove -y lukenukem/asus-linux
 sudo dnf remove -y asusctl supergfxctl asusctl-rog-gui
 
-# 2. Install the Terra repository 
+# 2. Install the Terra repository
 echo "Adding Terra repository..."
 sudo dnf install -y --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
 

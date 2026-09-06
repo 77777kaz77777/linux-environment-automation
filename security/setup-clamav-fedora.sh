@@ -24,7 +24,7 @@ fi
 
 # 1. Create the nightly multi-threaded scan script
 echo "Creating nightly scan script at /usr/local/bin/clamav-nightly-scan.sh..."
-cat << 'EOF' > /usr/local/bin/clamav-nightly-scan.sh
+cat <<'EOF' >/usr/local/bin/clamav-nightly-scan.sh
 #!/bin/bash
 LOGFILE="/var/log/clamav/daily_scan.log"
 mkdir -p /var/log/clamav
@@ -36,7 +36,7 @@ chmod +x /usr/local/bin/clamav-nightly-scan.sh
 
 # 2. Create the systemd service unit
 echo "Creating systemd service at /etc/systemd/system/clamav-nightly-scan.service..."
-cat << 'EOF' > /etc/systemd/system/clamav-nightly-scan.service
+cat <<'EOF' >/etc/systemd/system/clamav-nightly-scan.service
 [Unit]
 Description=Trigger multi-threaded ClamAV system scan
 After=clamd@scan.service
@@ -48,7 +48,7 @@ EOF
 
 # 3. Create the systemd timer unit
 echo "Creating systemd timer at /etc/systemd/system/clamav-nightly-scan.timer..."
-cat << 'EOF' > /etc/systemd/system/clamav-nightly-scan.timer
+cat <<'EOF' >/etc/systemd/system/clamav-nightly-scan.timer
 [Unit]
 Description=Run ClamAV Scan Automatically
 
@@ -62,7 +62,7 @@ EOF
 
 # 4. Create the manual on-demand terminal scanner
 echo "Creating manual scan script at /usr/local/bin/sys-scan..."
-cat << 'EOF' > /usr/local/bin/sys-scan
+cat <<'EOF' >/usr/local/bin/sys-scan
 #!/bin/bash
 echo "========================================="
 echo "    Starting Manual ClamAV System Scan   "
@@ -80,7 +80,7 @@ chmod +x /usr/local/bin/sys-scan
 
 # 5. Create the manual Freshclam signature updater
 echo "Creating manual updater script at /usr/local/bin/clamsig..."
-cat << 'EOF' > /usr/local/bin/clamsig
+cat <<'EOF' >/usr/local/bin/clamsig
 #!/bin/bash
 if [ "$EUID" -ne 0 ]; then
   echo "This script needs root privileges to stop/start systemd services."

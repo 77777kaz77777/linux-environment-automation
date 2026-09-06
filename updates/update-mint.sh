@@ -22,9 +22,9 @@ chmod 755 "$LOGDIR"
 
 # Function to log timestamped messages
 log_message() {
-    local timestamp
-    timestamp=$(date "+%Y-%m-%d %H:%M:%S")
-    echo "[$timestamp] $1" | tee -a "$LOGFILE"
+  local timestamp
+  timestamp=$(date "+%Y-%m-%d %H:%M:%S")
+  echo "[$timestamp] $1" | tee -a "$LOGFILE"
 }
 
 log_message "=== Starting Linux Mint System Maintenance ==="
@@ -46,22 +46,22 @@ log_message "Cleaning local package cache..."
 apt-get autoclean -q 2>&1 | tee -a "$LOGFILE"
 
 # 5. Update System & User Flatpaks
-if command -v flatpak &> /dev/null; then
-    log_message "Updating system-wide Flatpak applications..."
-    flatpak update -y 2>&1 | tee -a "$LOGFILE"
+if command -v flatpak &>/dev/null; then
+  log_message "Updating system-wide Flatpak applications..."
+  flatpak update -y 2>&1 | tee -a "$LOGFILE"
 
-    log_message "Cleaning unused Flatpak runtimes..."
-    flatpak uninstall --unused -y 2>&1 | tee -a "$LOGFILE"
+  log_message "Cleaning unused Flatpak runtimes..."
+  flatpak uninstall --unused -y 2>&1 | tee -a "$LOGFILE"
 
-    # Update user-level Flatpaks if executed via sudo
-    if [ "$TARGET_USER" != "root" ]; then
-        log_message "Updating user-level Flatpaks for $TARGET_USER..."
-        sudo -u "$TARGET_USER" flatpak update -y 2>&1 | tee -a "$LOGFILE" || true
-    fi
+  # Update user-level Flatpaks if executed via sudo
+  if [ "$TARGET_USER" != "root" ]; then
+    log_message "Updating user-level Flatpaks for $TARGET_USER..."
+    sudo -u "$TARGET_USER" flatpak update -y 2>&1 | tee -a "$LOGFILE" || true
+  fi
 else
-    log_message "Flatpak is not installed. Skipping Flatpak updates..."
+  log_message "Flatpak is not installed. Skipping Flatpak updates..."
 fi
 
 # Completion Message
 log_message "All updates and cleanups completed successfully!"
-echo "" >> "$LOGFILE"
+echo "" >>"$LOGFILE"

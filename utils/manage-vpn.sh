@@ -5,24 +5,24 @@ CONFIG_FILE="$HOME/#####/#####"
 
 # Function to bring the interface up
 turn_on() {
-    echo "Turning on WireGuard interface..."
-    sudo wg-quick up "$CONFIG_FILE"
-    if [ $? -eq 0 ]; then
-        echo "WireGuard interface is now up."
-    else
-        echo "Failed to bring up the WireGuard interface."
-    fi
+  echo "Turning on WireGuard interface..."
+  sudo wg-quick up "$CONFIG_FILE"
+  if [ $? -eq 0 ]; then
+    echo "WireGuard interface is now up."
+  else
+    echo "Failed to bring up the WireGuard interface."
+  fi
 }
 
 # Function to bring the interface down
 turn_off() {
-    echo "Turning off WireGuard interface..."
-    sudo wg-quick down "$CONFIG_FILE"
-    if [ $? -eq 0 ]; then
-        echo "WireGuard interface is now down."
-    else
-        echo "Failed to bring down the WireGuard interface."
-    fi
+  echo "Turning off WireGuard interface..."
+  sudo wg-quick down "$CONFIG_FILE"
+  if [ $? -eq 0 ]; then
+    echo "WireGuard interface is now down."
+  else
+    echo "Failed to bring down the WireGuard interface."
+  fi
 }
 
 # Prompt the user for action
@@ -33,13 +33,13 @@ read -p "Please enter your choice (1 or 2): " choice
 
 # Execute the corresponding function based on user input
 case "$choice" in
-    1)
-        turn_on
-        ;;
-    2)
-        turn_off
-        ;;
-    *)
-        echo "Invalid choice. Please enter 1 or 2."
-        ;;
+  1)
+    turn_on
+    ;;
+  2)
+    turn_off
+    ;;
+  *)
+    echo "Invalid choice. Please enter 1 or 2."
+    ;;
 esac

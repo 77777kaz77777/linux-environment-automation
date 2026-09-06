@@ -2,7 +2,7 @@
 #  Cleanup routine for clearing out old APT packages and caches on Linux Mint.
 
 # Ensure we are running with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "Please run as root (use sudo)"
   exit
 fi
@@ -17,19 +17,18 @@ apt purge -y telnet ftp rsh-client talk
 # This targets apps most people replace or never use.
 echo "Removing common bloat apps..."
 apt purge -y \
-    hexchat \
-    thunderbird \
-    transmission-common \
-    transmission-gtk \
-    drawing \
-    sticky \
-    pix \
-    hypnotix \
-    thingy \
-    warpinator \
-    gnome-calendar \
-    gnome-logs \
-   
+  hexchat \
+  thunderbird \
+  transmission-common \
+  transmission-gtk \
+  drawing \
+  sticky \
+  pix \
+  hypnotix \
+  thingy \
+  warpinator \
+  gnome-calendar \
+  gnome-logs
 
 # 3. Remove Default Games
 echo "Removing pre-installed games..."

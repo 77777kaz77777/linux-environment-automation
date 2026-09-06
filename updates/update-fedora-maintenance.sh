@@ -13,8 +13,8 @@ RESET="\033[0m"
 # Root Privilege Check & Context Resolution
 # -----------------------------------------------------------------------------
 if [[ $EUID -ne 0 ]]; then
-   echo -e "${BOLD}\033[31m[ERROR] This script must be run as root or via sudo.${RESET}" >&2
-   exit 1
+  echo -e "${BOLD}\033[31m[ERROR] This script must be run as root or via sudo.${RESET}" >&2
+  exit 1
 fi
 
 # Determine the actual non-root user who invoked sudo
@@ -30,13 +30,13 @@ echo -e "${BOLD}${CYAN}=== Starting Fedora $FEDORA_VERSION System Maintenance ==
 echo -e "${GREEN}[1/5] Updating DNF packages and Flatpaks...${RESET}"
 dnf upgrade --refresh -y
 
-if command -v flatpak &> /dev/null; then
-    flatpak update -y
-    
-    # Also update user-level Flatpaks if executed via sudo
-    if [[ "$TARGET_USER" != "root" ]]; then
-        sudo -u "$TARGET_USER" flatpak update -y || true
-    fi
+if command -v flatpak &>/dev/null; then
+  flatpak update -y
+
+  # Also update user-level Flatpaks if executed via sudo
+  if [[ "$TARGET_USER" != "root" ]]; then
+    sudo -u "$TARGET_USER" flatpak update -y || true
+  fi
 fi
 
 # -----------------------------------------------------------------------------
@@ -49,9 +49,9 @@ dnf clean all
 # -----------------------------------------------------------------------------
 # 3. Clean Flatpak Unused Runtimes
 # -----------------------------------------------------------------------------
-if command -v flatpak &> /dev/null; then
-    echo -e "\n${GREEN}[3/5] Removing unused Flatpak runtimes...${RESET}"
-    flatpak uninstall --unused -y
+if command -v flatpak &>/dev/null; then
+  echo -e "\n${GREEN}[3/5] Removing unused Flatpak runtimes...${RESET}"
+  flatpak uninstall --unused -y
 fi
 
 # -----------------------------------------------------------------------------
@@ -61,11 +61,11 @@ echo -e "\n${GREEN}[4/5] Clearing old systemd logs and KDE Plasma cache...${RESE
 journalctl --vacuum-time=7d
 
 if [[ "$TARGET_USER" != "root" && -d "$TARGET_HOME" ]]; then
-    echo "Cleaning user cache for $TARGET_USER..."
-    rm -rf "${TARGET_HOME}/.cache/kiconcache"* 2>/dev/null || true
-    rm -rf "${TARGET_HOME}/.cache/kioexec/" 2>/dev/null || true
-    rm -rf "${TARGET_HOME}/.cache/ksycoca"* 2>/dev/null || true
-    rm -rf "${TARGET_HOME}/.cache/plasma"* 2>/dev/null || true
+  echo "Cleaning user cache for $TARGET_USER..."
+  rm -rf "${TARGET_HOME}/.cache/kiconcache"* 2>/dev/null || true
+  rm -rf "${TARGET_HOME}/.cache/kioexec/" 2>/dev/null || true
+  rm -rf "${TARGET_HOME}/.cache/ksycoca"* 2>/dev/null || true
+  rm -rf "${TARGET_HOME}/.cache/plasma"* 2>/dev/null || true
 fi
 
 # -----------------------------------------------------------------------------
@@ -73,8 +73,8 @@ fi
 # -----------------------------------------------------------------------------
 echo -e "\n${GREEN}[5/5] Emptying Trash for $TARGET_USER...${RESET}"
 if [[ "$TARGET_USER" != "root" && -d "${TARGET_HOME}/.local/share/Trash" ]]; then
-    rm -rf "${TARGET_HOME}/.local/share/Trash/files/"* 2>/dev/null || true
-    rm -rf "${TARGET_HOME}/.local/share/Trash/info/"* 2>/dev/null || true
+  rm -rf "${TARGET_HOME}/.local/share/Trash/files/"* 2>/dev/null || true
+  rm -rf "${TARGET_HOME}/.local/share/Trash/info/"* 2>/dev/null || true
 fi
 
 echo -e "\n${BOLD}${GREEN}✔ System maintenance completed successfully!${RESET}"

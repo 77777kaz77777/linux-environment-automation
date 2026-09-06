@@ -35,16 +35,16 @@ echo "[+] Disk Capacity Warnings:"
 warning_found=false
 # Parse df output, grab usage percentage and mount point, skipping the header line
 while read -r usage mount; do
-    # Remove the % sign for integer comparison
-    usage_val=${usage%\%}
-    if [ "$usage_val" -gt 85 ]; then
-        echo "    ⚠️  WARNING: Partition '$mount' is at ${usage} capacity!"
-        warning_found=true
-    fi
+  # Remove the % sign for integer comparison
+  usage_val=${usage%\%}
+  if [ "$usage_val" -gt 85 ]; then
+    echo "    ⚠️  WARNING: Partition '$mount' is at ${usage} capacity!"
+    warning_found=true
+  fi
 done < <(df -h -T -x tmpfs -x devtmpfs -x squashfs -x efivarfs | awk 'NR>1 {print $6, $7}')
 
 if [ "$warning_found" = false ]; then
-    echo "    ✅ No partitions are above 85% capacity."
+  echo "    ✅ No partitions are above 85% capacity."
 fi
 echo ""
 
@@ -56,10 +56,10 @@ echo "[+] Failed Systemd Services:"
 failed_services=$(systemctl --failed --no-legend --plain)
 
 if [ -z "$failed_services" ]; then
-    echo "    ✅ No failed systemd services. System is running cleanly."
+  echo "    ✅ No failed systemd services. System is running cleanly."
 else
-    echo "    ❌ WARNING: The following services have failed:"
-    echo "$failed_services"
+  echo "    ❌ WARNING: The following services have failed:"
+  echo "$failed_services"
 fi
 echo ""
 echo "=================================================="

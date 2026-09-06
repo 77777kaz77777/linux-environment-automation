@@ -1,15 +1,15 @@
 #!/bin/bash
-# Script to change and apply the display manager wallpaper. 
+# Script to change and apply the display manager wallpaper.
 
 # Ensure the script is run with sudo
-if [ "$EUID" -ne 0 ]; then 
+if [ "$EUID" -ne 0 ]; then
   echo "Please run as root (use sudo)"
   exit
 fi
 
 echo "Step 1: Creating GDM dconf profile..."
 mkdir -p /etc/dconf/profile
-cat <<EOF > /etc/dconf/profile/gdm
+cat <<EOF >/etc/dconf/profile/gdm
 user-db:user
 system-db:gdm
 file-db:/usr/share/gdm/greeter-dconf-defaults
@@ -17,7 +17,7 @@ EOF
 
 echo "Step 2: Creating black background configuration..."
 mkdir -p /etc/dconf/db/gdm.d
-cat <<EOF > /etc/dconf/db/gdm.d/10-black-bg
+cat <<EOF >/etc/dconf/db/gdm.d/10-black-bg
 [com/ubuntu/login-screen]
 background-color='#000000'
 EOF

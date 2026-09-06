@@ -18,21 +18,21 @@ echo -e "${BOLD}${MAGENTA} ╚════════════════�
 
 # Function to cleanly format and print each layer in a tree structure
 print_layer() {
-    local layer="$1"
-    local protocols="$2"
-    local threats_line1="$3"
-    local threats_line2="$4"
+  local layer="$1"
+  local protocols="$2"
+  local threats_line1="$3"
+  local threats_line2="$4"
 
-    echo -e "${BOLD}${CYAN}■ ${layer}${RESET}"
-    echo -e "${DIM}│${RESET}"
-    echo -e "${DIM}├─${RESET} ${BOLD}${GREEN}[+] Protocols:${RESET}  ${protocols}"
-    
-    if [ -n "$threats_line2" ]; then
-        echo -e "${DIM}└─${RESET} ${BOLD}${RED}[!] Threats:  ${RESET}  ${threats_line1}"
-        echo -e "                  ${threats_line2}\n"
-    else
-        echo -e "${DIM}└─${RESET} ${BOLD}${RED}[!] Threats:  ${RESET}  ${threats_line1}\n"
-    fi
+  echo -e "${BOLD}${CYAN}■ ${layer}${RESET}"
+  echo -e "${DIM}│${RESET}"
+  echo -e "${DIM}├─${RESET} ${BOLD}${GREEN}[+] Protocols:${RESET}  ${protocols}"
+
+  if [ -n "$threats_line2" ]; then
+    echo -e "${DIM}└─${RESET} ${BOLD}${RED}[!] Threats:  ${RESET}  ${threats_line1}"
+    echo -e "                  ${threats_line2}\n"
+  else
+    echo -e "${DIM}└─${RESET} ${BOLD}${RED}[!] Threats:  ${RESET}  ${threats_line1}\n"
+  fi
 }
 
 print_layer "Layer 7: Application Layer" \

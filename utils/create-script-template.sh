@@ -1,7 +1,6 @@
 #!/bin/bash
 # Interactive generator that scaffolds a new, executable Bash script with standard headers and strict error handling flags.
 
-
 set -euo pipefail
 
 # Prompt user for the filename
@@ -27,7 +26,7 @@ if [[ -f "$filename" ]]; then
 fi
 
 # Write shebang and production-grade script header
-cat <<'EOF' > "$filename"
+cat <<'EOF' >"$filename"
 #!/bin/bash
 # ==============================================================================
 # Script Name: 

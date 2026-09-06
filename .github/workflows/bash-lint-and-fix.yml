@@ -1,0 +1,59 @@
+name: Maintain and Auto-Fix Bash Scripts
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  auto-fix-and-lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write 
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shfmt shellcheck patch
+
+      - name: Auto-format Bash scripts (shfmt)
+        run: |
+          find . -type f -name "*.sh" -exec shfmt -w -i 2 -ci {} +
+          
+      - name: Auto-fix blank lines before Shebang (SC1128)
+        run: |
+          # Removes any empty lines at the very top of .sh files so the shebang is strictly on line 1
+          find . -type f -name "*.sh" -exec sed -i -e '/./,$!d' {} +
+
+      - name: Auto-apply ShellCheck fixes (SC2129, SC2181, SC2162)
+        run: |
+          # Generates a patch file for all fixable ShellCheck issues (like redirects, exit codes, and read flags)
+          find . -type f -name "*.sh" -exec shellcheck -f diff {} + > shellcheck-fixes.patch
+          
+          # Applies the patch automatically if fixes were found
+          if [ -s shellcheck-fixes.patch ]; then
+            patch -p1 < shellcheck-fixes.patch
+          fi
+          rm -f shellcheck-fixes.patch
+
+      - name: Commit auto-remediations
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: fully automated shfmt and shellcheck fixes"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          
+      - name: Run ShellCheck (Strict Errors Only)
+        run: |
+          # Fails the pipeline ONLY for critical syntax errors. 
+          # Ignores stylistic warnings (like SC2034: unused variables) to prevent manual intervention.
+          find . -type f -name "*.sh" -exec shellcheck --severity=error {} +

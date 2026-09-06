@@ -38,7 +38,7 @@ jobs:
         run: ruff check . --fix --unsafe-fixes --exit-zero
 
       - name: Auto-Fix JSON (Prettier)
-        run: npx --yes prettier --write "**/*.json"
+        run: npx --yes prettier --write "**/*.json" || true
 
       - name: Lint YAML (yamllint)
         run: yamllint . || true

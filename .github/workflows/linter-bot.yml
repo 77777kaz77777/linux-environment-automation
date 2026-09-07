@@ -44,7 +44,7 @@ jobs:
         run: yamllint . || true
 
       - name: Commit and Push Changes
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: auto-fix linting and formatting errors"
           skip_dirty_check: false

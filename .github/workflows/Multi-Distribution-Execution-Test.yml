@@ -26,34 +26,34 @@ jobs:
           - name: Fedora
             image: fedora:latest
             pm: dnf
-            install: dnf install -y --refresh python3 python3-pip git bash findutils grep sudo
-          - name: RedHat (ubi9)
-            image: registry.access.redhat.com/ubi9/ubi:latest
+            install: dnf install -y --refresh python3 python3-pip git bash findutils grep sudo clamav
+          - name: RedHat (Rocky 9)
+            image: rockylinux:9
             pm: dnf
-            install: dnf install -y --refresh python3 python3-pip git bash findutils grep sudo
+            install: dnf install -y --refresh python3 python3-pip git bash findutils grep sudo clamav
           - name: Ubuntu
             image: ubuntu:latest
             pm: apt
-            install: DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y python3 python3-pip git bash findutils grep sudo
+            install: DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y python3 python3-pip git bash findutils grep sudo clamav
           - name: Debian
             image: debian:latest
             pm: apt
-            install: DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y python3 python3-pip git bash findutils grep sudo
+            install: DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y python3 python3-pip git bash findutils grep sudo clamav
           - name: Alpine
             image: alpine:latest
             pm: apk
-            install: apk add --no-cache python3 py3-pip git bash findutils grep sudo
+            install: apk add --no-cache python3 py3-pip git bash findutils grep sudo clamav
           - name: Arch
             image: archlinux:latest
             pm: pacman
-            install: pacman -Syu --noconfirm python git bash findutils grep sudo
+            install: pacman -Syu --noconfirm python git bash findutils grep sudo clamav
 
     container:
       image: ${{ matrix.image }}
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Install Runtime Dependencies
         run: ${{ matrix.install }}
@@ -62,11 +62,18 @@ jobs:
         shell: bash
         env:
           USER: root
+          CI: true
         run: |
           echo "::group::Executing scripts matching ${{ matrix.pm }} on ${{ matrix.name }}"
           failed=0
           
           while IFS= read -r -d '' script; do
+            # Skip scripts that require host kernel, systemd, or network admin privileges inside containers
+            if [[ "$script" == "./security/harden-cachyos.sh" ]] || [[ "$script" == "./utils/fedora_rog_setup.sh" ]]; then
+              echo "⏭️ Skipping $script (requires host kernel/systemd privileges)"
+              continue
+            fi
+
             echo "Running: $script"
             chmod +x "$script"
             if ! bash "$script"; then
@@ -82,6 +89,7 @@ jobs:
         shell: bash
         env:
           USER: root
+          CI: true
         run: |
           echo "::group::Scanning Python scripts on ${{ matrix.name }}"
           failed=0

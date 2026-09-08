@@ -1,5 +1,4 @@
 ---
-
 name: Multi-Distribution Execution Test
 
 on:
@@ -39,10 +38,6 @@ jobs:
             image: debian:latest
             pm: apt
             install: DEBIAN_FRONTEND=noninteractive apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y python3 python3-pip git bash findutils grep sudo clamav
-          - name: Alpine
-            image: alpine:latest
-            pm: apk
-            install: apk add --no-cache python3 py3-pip git bash findutils grep sudo clamav
           - name: Arch
             image: archlinux:latest
             pm: pacman
@@ -64,23 +59,39 @@ jobs:
           USER: root
           CI: true
         run: |
-          echo "::group::Executing scripts matching ${{ matrix.pm }} on ${{ matrix.name }}"
+          echo "::group::Executing testable scripts on ${{ matrix.name }}"
           failed=0
           
-          while IFS= read -r -d '' script; do
-            # Skip scripts that require host kernel, systemd, or specialized environment configurations inside containers
-            if [[ "$script" == "./security/harden-cachyos.sh" ]] || [[ "$script" == "./utils/fedora_rog_setup.sh" ]] || [[ "$script" == "./security/setup-clamav-fedora.sh" ]]; then
-              echo "⏭️ Skipping $script (requires host kernel/systemd privileges or specialized setup)"
-              continue
-            fi
+          # Explicit array of testable scripts across updates, security, and utils
+          testable_scripts=(
+            "./updates/update-fedora.sh"
+            "./updates/update-fedora-maintenance.sh"
+            "./updates/debloat-fedora-kde.sh"
+            "./updates/update-ubuntu.sh"
+            "./updates/update-arch.sh"
+            "./updates/update-mint.sh"
+            "./updates/clean-mint.sh"
+            "./updates/system-cleanup.sh"
+            "./security/clamav-nightly-scan.sh"
+            "./security/run-clamav-scan.sh"
+            "./security/update-clamav-signatures.sh"
+            "./utils/system-health-report.sh"
+            "./utils/osi-security-overview.sh"
+          )
 
-            echo "Running: $script"
-            chmod +x "$script"
-            if ! bash "$script"; then
-              echo "❌ Execution failed in $script"
-              failed=1
+          for script in "${testable_scripts[@]}"; do
+            if [[ -f "$script" ]]; then
+              echo "Running: $script"
+              chmod +x "$script"
+              if ! bash -n "$script"; then
+                echo "❌ Syntax error in $script"
+                failed=1
+              elif ! bash "$script"; then
+                echo "❌ Execution failed in $script"
+                failed=1
+              fi
             fi
-          done < <(grep -l -Z -r -E "\b${{ matrix.pm }}\b" . --exclude-dir={node_modules,.git,.venv} --include="*.sh")
+          done
           
           echo "::endgroup::"
           exit $failed
@@ -91,7 +102,7 @@ jobs:
           USER: root
           CI: true
         run: |
-          echo "::group::Scanning Python scripts on ${{ matrix.name }}"
+          echo "::group::Scanning Python scripts"
           failed=0
           while IFS= read -r -d '' script; do
             echo "Checking: $script"

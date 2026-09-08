@@ -1,8 +1,9 @@
 ## This script scans a local directory of bash scripts, uses a local LLM via LM Studio to analyze and categorize each one, and compiles the metadata into a JSON manifest file.
 
 
-import os
 import json
+import os
+
 from openai import OpenAI
 
 # Point to the local LM Studio server

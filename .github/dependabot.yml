@@ -10,7 +10,7 @@ updates:
     commit-message:
       prefix: "ci"
 
-- package-ecosystem: "pip"
+  - package-ecosystem: "pip"
     directory: "/utils"
     schedule:
       interval: "daily"
@@ -20,7 +20,7 @@ updates:
     commit-message:
       prefix: "deps"
 
-      - package-ecosystem: "pip"
+  - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "daily"

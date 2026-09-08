@@ -2,10 +2,10 @@
 
 
 #!/usr/bin/env python3
-import os
 import json
-import shutil
+import os
 import re
+import shutil
 
 # Configuration
 BASE_DIR = "/mnt/router_scripts/_Organized_Files/Scripts_And_Configs/"
@@ -81,8 +81,7 @@ def main():
             readme.write(f"## {category.replace('-', ' ').title()}\n\n")
             readme.write("| Filename | Description |\n")
             readme.write("|---|---|\n")
-            for script in sorted(scripts, key=lambda x: x['filename']):
-                readme.write(f"| `{script['filename']}` | {script['summary']} |\n")
+            readme.writelines(f"| `{script['filename']}` | {script['summary']} |\n" for script in sorted(scripts, key=lambda x: x['filename']))
             readme.write("\n")
 
     print("Organization complete.")

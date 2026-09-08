@@ -1,6 +1,7 @@
+---
 name: Maintain and Auto-Fix Bash Scripts
 
-on:
+"on":
   push:
     branches: [main]
   pull_request:
@@ -13,7 +14,7 @@ jobs:
   auto-fix-and-lint:
     runs-on: ubuntu-latest
     permissions:
-      contents: write 
+      contents: write
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -28,20 +29,19 @@ jobs:
       - name: Auto-format Bash scripts (shfmt)
         run: |
           find . -type f -name "*.sh" -exec shfmt -w -i 2 -ci {} +
-          
+
       - name: Auto-fix Shebang placement (SC1128)
         run: |
-          # 1. Convert CRLF to LF line endings. Hidden Windows carriage returns often cause standard empty-line regex matching to fail.
+          # 1. Convert CRLF to LF line endings.
           find . -type f -name "*.sh" -exec dos2unix -q {} +
-          
-          # 2. Safely locate the shebang line and strip EVERYTHING above it (spaces, hidden characters, or comments) 
-          # to guarantee #!/bin/bash is strictly on line 1.
+
+          # 2. Safely locate the shebang line and strip EVERYTHING above it
           find . -type f -name "*.sh" -exec bash -c 'for f; do if grep -q "^#!" "$f"; then sed -i -n "/^#!/,\$p" "$f"; fi; done' _ {} +
 
       - name: Auto-apply ShellCheck fixes (SC2129, SC2181, SC2162)
         run: |
           find . -type f -name "*.sh" -exec shellcheck -f diff {} + > shellcheck-fixes.patch || true
-          
+
           if [ -s shellcheck-fixes.patch ]; then
             patch -p1 < shellcheck-fixes.patch
           fi
@@ -53,7 +53,7 @@ jobs:
           commit_message: "chore: fully automated shfmt and shellcheck fixes"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
-          
+
       - name: Run ShellCheck (Strict Errors Only)
         run: |
           find . -type f -name "*.sh" -exec shellcheck --severity=error {} +

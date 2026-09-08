@@ -102,12 +102,6 @@ jobs:
           echo "::group::Executing dedicated scripts on ${{ matrix.name }}"
           failed=0
           
-          for script in "${{ matrix.scripts }}"; do
-            # Note: matrix arrays need expansion handling or direct line iteration
-            # Using a loop structure via mapping
-          done
-
-          # Direct fallback evaluation loop for matrix elements in bash
           for script in ${{ join(matrix.scripts, ' ') }}; do
             if [[ -f "$script" ]]; then
               echo "Running: $script"

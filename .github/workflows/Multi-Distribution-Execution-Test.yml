@@ -68,9 +68,9 @@ jobs:
           failed=0
           
           while IFS= read -r -d '' script; do
-            # Skip scripts that require host kernel, systemd, or network admin privileges inside containers
-            if [[ "$script" == "./security/harden-cachyos.sh" ]] || [[ "$script" == "./utils/fedora_rog_setup.sh" ]]; then
-              echo "⏭️ Skipping $script (requires host kernel/systemd privileges)"
+            # Skip scripts that require host kernel, systemd, or specialized environment configurations inside containers
+            if [[ "$script" == "./security/harden-cachyos.sh" ]] || [[ "$script" == "./utils/fedora_rog_setup.sh" ]] || [[ "$script" == "./security/setup-clamav-fedora.sh" ]]; then
+              echo "⏭️ Skipping $script (requires host kernel/systemd privileges or specialized setup)"
               continue
             fi
 

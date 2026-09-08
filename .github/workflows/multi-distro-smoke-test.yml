@@ -1,11 +1,14 @@
----
 name: Multi-Distribution Smoke Test
 
-"on":
+on:
   push:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -26,10 +29,10 @@ jobs:
             install: dnf install -y --refresh python3 python3-pip git bash findutils
           - name: Ubuntu
             image: ubuntu:latest
-            install: apt-get update && apt-get install -y python3 python3-pip git bash findutils
+            install: DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y python3 python3-pip git bash findutils
           - name: Debian
             image: debian:latest
-            install: apt-get update && apt-get install -y python3 python3-pip git bash findutils
+            install: DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y python3 python3-pip git bash findutils
           - name: Alpine
             image: alpine:latest
             install: apk add --no-cache python3 py3-pip git bash findutils
@@ -48,27 +51,31 @@ jobs:
         run: ${{ matrix.install }}
 
       - name: Smoke Test All Shell Scripts (.sh)
+        shell: bash
         run: |
-          echo "Scanning shell scripts on ${{ matrix.name }}..."
+          echo "::group::Scanning shell scripts on ${{ matrix.name }}"
           failed=0
-          for script in $(find . -name "*.sh" -not -path "./node_modules/*"); do
+          while IFS= read -r -d '' script; do
             echo "Checking: $script"
             if ! bash -n "$script"; then
               echo "❌ Syntax error found in $script"
               failed=1
             fi
-          done
+          done < <(find . -type d \( -name node_modules -o -name .git -o -name .venv \) -prune -o -type f -name "*.sh" -print0)
+          echo "::endgroup::"
           exit $failed
 
       - name: Smoke Test All Python Scripts (.py)
+        shell: bash
         run: |
-          echo "Scanning Python scripts on ${{ matrix.name }}..."
+          echo "::group::Scanning Python scripts on ${{ matrix.name }}"
           failed=0
-          for script in $(find . -name "*.py" -not -path "./node_modules/*"); do
+          while IFS= read -r -d '' script; do
             echo "Checking: $script"
             if ! python3 -m py_compile "$script"; then
               echo "❌ Compilation error found in $script"
               failed=1
             fi
-          done
+          done < <(find . -type d \( -name node_modules -o -name .git -o -name .venv \) -prune -o -type f -name "*.py" -print0)
+          echo "::endgroup::"
           exit $failed

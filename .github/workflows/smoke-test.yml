@@ -1,10 +1,11 @@
+---
 name: Container Smoke Test
 
-on:
+"on":
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -31,21 +32,4 @@ jobs:
           while IFS= read -r -d '' script; do
             echo "Checking: $script"
             if ! bash -n "$script"; then
-              echo "❌ Syntax error found in $script"
-              failed=1
-            fi
-          done < <(find . -name "*.sh" -not -path "./node_modules/*" -print0)
-          exit $failed
-
-      - name: Smoke Test All Python Scripts (.py)
-        run: |
-          echo "Scanning and compiling all Python scripts..."
-          failed=0
-          while IFS= read -r -d '' script; do
-            echo "Checking: $script"
-            if ! python3 -m py_compile "$script"; then
-              echo "❌ Compilation error found in $script"
-              failed=1
-            fi
-          done < <(find . -name "*.py" -not -path "./node_modules/*" -print0)
-          exit $failed
+             

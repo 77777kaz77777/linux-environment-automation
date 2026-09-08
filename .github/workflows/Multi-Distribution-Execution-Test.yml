@@ -1,0 +1,92 @@
+---
+
+name: Multi-Distribution Execution Test
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test on ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Fedora
+            image: fedora:latest
+            pm: dnf
+            install: dnf install -y --refresh python3 python3-pip git bash findutils grep
+          - name: RedHat (ubi9)
+            image: registry.access.redhat.com/ubi9/ubi:latest
+            pm: dnf
+            install: dnf install -y --refresh python3 python3-pip git bash findutils grep
+          - name: Ubuntu
+            image: ubuntu:latest
+            pm: apt
+            install: DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y python3 python3-pip git bash findutils grep
+          - name: Debian
+            image: debian:latest
+            pm: apt
+            install: DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y python3 python3-pip git bash findutils grep
+          - name: Alpine
+            image: alpine:latest
+            pm: apk
+            install: apk add --no-cache python3 py3-pip git bash findutils grep
+          - name: Arch
+            image: archlinux:latest
+            pm: pacman
+            install: pacman -Syu --noconfirm python git bash findutils grep
+
+    container:
+      image: ${{ matrix.image }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Install Runtime Dependencies
+        run: ${{ matrix.install }}
+
+      - name: Execute Shell Scripts
+        shell: bash
+        run: |
+          echo "::group::Executing scripts matching ${{ matrix.pm }} on ${{ matrix.name }}"
+          failed=0
+          
+          while IFS= read -r -d '' script; do
+            echo "Running: $script"
+            chmod +x "$script"
+            if ! bash "$script"; then
+              echo "❌ Execution failed in $script"
+              failed=1
+            fi
+          done < <(grep -l -Z -r -E "\b${{ matrix.pm }}\b" . --exclude-dir={node_modules,.git,.venv} --include="*.sh")
+          
+          echo "::endgroup::"
+          exit $failed
+
+      - name: Smoke Test All Python Scripts (.py)
+        shell: bash
+        run: |
+          echo "::group::Scanning Python scripts on ${{ matrix.name }}"
+          failed=0
+          while IFS= read -r -d '' script; do
+            echo "Checking: $script"
+            if ! python3 -m py_compile "$script"; then
+              echo "❌ Compilation error found in $script"
+              failed=1
+            fi
+          done < <(find . -type d \( -name node_modules -o -name .git -o -name .venv \) -prune -o -type f -name "*.py" -print0)
+          echo "::endgroup::"
+          exit $failed

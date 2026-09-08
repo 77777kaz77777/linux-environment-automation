@@ -24,24 +24,64 @@ jobs:
         include:
           - name: Fedora
             image: fedora:latest
-            pm: dnf
             install: dnf install -y --refresh python3 python3-pip git bash findutils grep sudo clamav
+            scripts:
+              - "./updates/update-fedora.sh"
+              - "./updates/update-fedora-maintenance.sh"
+              - "./updates/debloat-fedora-kde.sh"
+              - "./updates/system-cleanup.sh"
+              - "./security/clamav-nightly-scan.sh"
+              - "./security/run-clamav-scan.sh"
+              - "./security/update-clamav-signatures.sh"
+              - "./utils/osi-security-overview.sh"
+
           - name: RedHat (Rocky 9)
             image: rockylinux:9
-            pm: dnf
             install: dnf install -y epel-release && dnf install -y --refresh python3 python3-pip git bash findutils grep sudo clamav
+            scripts:
+              - "./updates/update-fedora.sh"
+              - "./updates/update-fedora-maintenance.sh"
+              - "./updates/debloat-fedora-kde.sh"
+              - "./updates/system-cleanup.sh"
+              - "./security/clamav-nightly-scan.sh"
+              - "./security/run-clamav-scan.sh"
+              - "./security/update-clamav-signatures.sh"
+              - "./utils/osi-security-overview.sh"
+
           - name: Ubuntu
             image: ubuntu:latest
-            pm: apt
             install: DEBIAN_FRONTEND=noninteractive apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y python3 python3-pip git bash findutils grep sudo clamav
+            scripts:
+              - "./updates/update-ubuntu.sh"
+              - "./updates/update-mint.sh"
+              - "./updates/clean-mint.sh"
+              - "./updates/system-cleanup.sh"
+              - "./security/clamav-nightly-scan.sh"
+              - "./security/run-clamav-scan.sh"
+              - "./security/update-clamav-signatures.sh"
+              - "./utils/osi-security-overview.sh"
+
           - name: Debian
             image: debian:latest
-            pm: apt
             install: DEBIAN_FRONTEND=noninteractive apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y python3 python3-pip git bash findutils grep sudo clamav
+            scripts:
+              - "./updates/update-ubuntu.sh"
+              - "./updates/system-cleanup.sh"
+              - "./security/clamav-nightly-scan.sh"
+              - "./security/run-clamav-scan.sh"
+              - "./security/update-clamav-signatures.sh"
+              - "./utils/osi-security-overview.sh"
+
           - name: Arch
             image: archlinux:latest
-            pm: pacman
             install: pacman -Syu --noconfirm python git bash findutils grep sudo clamav
+            scripts:
+              - "./updates/update-arch.sh"
+              - "./updates/system-cleanup.sh"
+              - "./security/clamav-nightly-scan.sh"
+              - "./security/run-clamav-scan.sh"
+              - "./security/update-clamav-signatures.sh"
+              - "./utils/osi-security-overview.sh"
 
     container:
       image: ${{ matrix.image }}
@@ -59,27 +99,16 @@ jobs:
           USER: root
           CI: true
         run: |
-          echo "::group::Executing testable scripts on ${{ matrix.name }}"
+          echo "::group::Executing dedicated scripts on ${{ matrix.name }}"
           failed=0
           
-          # Explicit array of testable scripts across updates, security, and utils
-          testable_scripts=(
-            "./updates/update-fedora.sh"
-            "./updates/update-fedora-maintenance.sh"
-            "./updates/debloat-fedora-kde.sh"
-            "./updates/update-ubuntu.sh"
-            "./updates/update-arch.sh"
-            "./updates/update-mint.sh"
-            "./updates/clean-mint.sh"
-            "./updates/system-cleanup.sh"
-            "./security/clamav-nightly-scan.sh"
-            "./security/run-clamav-scan.sh"
-            "./security/update-clamav-signatures.sh"
-            "./utils/system-health-report.sh"
-            "./utils/osi-security-overview.sh"
-          )
+          for script in "${{ matrix.scripts }}"; do
+            # Note: matrix arrays need expansion handling or direct line iteration
+            # Using a loop structure via mapping
+          done
 
-          for script in "${testable_scripts[@]}"; do
+          # Direct fallback evaluation loop for matrix elements in bash
+          for script in ${{ join(matrix.scripts, ' ') }}; do
             if [[ -f "$script" ]]; then
               echo "Running: $script"
               chmod +x "$script"

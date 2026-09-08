@@ -1,4 +1,4 @@
-# 🐧 linux-maintenance-and-dotfiles
+# 🐧 linux-environment-automation
 
 A personal repository dedicated to Linux system maintenance, distro updates, terminal configuration files (dotfiles), and custom desktop enhancements.
 

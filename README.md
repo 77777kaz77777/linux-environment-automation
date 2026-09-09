@@ -18,7 +18,7 @@ The repository also demonstrates practical implementations of infrastructure man
 | `fastfetch-laptop1-config.jsonc` | Fastfetch system info configuration for the primary laptop (ASUS ROG Zephyrus G15). |
 | `fastfetch-laptop2-config.jsonc` | Fastfetch system info configuration for the secondary laptop (Lenovo ThinkPad T470). |
 | `setup-alacritty.sh` | Automates Alacritty installation, font setup, and configuration for Fedora |
-| `setup-bashrc.sh` | Terminal configuration and custom bash aliases |
+| `setup-bashrc.sh` | safely installs the custom .bashrc configuration and aliases. |
 
 
 ### 📁 desktop-tweaks/ (UI customization & desktop scripts)

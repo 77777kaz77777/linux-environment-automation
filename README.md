@@ -17,6 +17,7 @@ The repository also demonstrates practical implementations of infrastructure man
 | `dnf.conf` | Optimized Fedora DNF package manager config tweaked for max download speeds, parallel downloads, and clean dependency management. |
 | `fastfetch-laptop1-config.jsonc` | Fastfetch system info configuration for the primary laptop (ASUS ROG Zephyrus G15). |
 | `fastfetch-laptop2-config.jsonc` | Fastfetch system info configuration for the secondary laptop (Lenovo ThinkPad T470). |
+| `setup-alacritty.sh` | Automates Alacritty installation, font setup, and configuration for Fedora |
 | `setup-bashrc.sh` | Terminal configuration and custom bash aliases |
 
 

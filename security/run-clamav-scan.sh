@@ -1,3 +1,6 @@
+## multithreaded ClamAV daemon scan for /home and system binaries.
+
+
 #!/bin/bash
 echo "========================================="
 echo "    Starting Manual ClamAV System Scan   "

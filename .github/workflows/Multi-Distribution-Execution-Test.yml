@@ -50,7 +50,6 @@ jobs:
               - "./security/update-clamav-signatures.sh"
               - "./utils/osi-security-overview.sh"
               - "./configs/setup-bashrc.sh"
-              - "./configs/setup-alacritty.sh"
 
 
 
@@ -67,7 +66,6 @@ jobs:
               - "./security/update-clamav-signatures.sh"
               - "./utils/osi-security-overview.sh"
               - "./configs/setup-bashrc.sh"
-              - "./configs/setup-alacritty.sh"
 
 
           - name: Debian
@@ -81,7 +79,6 @@ jobs:
               - "./security/update-clamav-signatures.sh"
               - "./utils/osi-security-overview.sh"
               - "./configs/setup-bashrc.sh"
-              - "./configs/setup-alacritty.sh"
 
 
 
@@ -96,7 +93,6 @@ jobs:
               - "./security/update-clamav-signatures.sh"
               - "./utils/osi-security-overview.sh"
               - "./configs/setup-bashrc.sh"
-              - "./configs/setup-alacritty.sh"
 
 
 

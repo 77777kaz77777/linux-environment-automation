@@ -1,11 +1,15 @@
 ---
 name: Maintain and Auto-Fix Bash Scripts
 
-"on":
+on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -19,7 +23,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Install dependencies
         run: |
@@ -32,20 +37,21 @@ jobs:
 
       - name: Auto-fix Shebang placement (SC1128)
         run: |
-          # 1. Convert CRLF to LF line endings.
           find . -type f -name "*.sh" -exec dos2unix -q {} +
-
-          # 2. Safely locate the shebang line and strip EVERYTHING above it
           find . -type f -name "*.sh" -exec bash -c 'for f; do if grep -q "^#!" "$f"; then sed -i -n "/^#!/,\$p" "$f"; fi; done' _ {} +
 
       - name: Auto-apply ShellCheck fixes (SC2129, SC2181, SC2162)
         run: |
           find . -type f -name "*.sh" -exec shellcheck -f diff {} + > shellcheck-fixes.patch || true
-
           if [ -s shellcheck-fixes.patch ]; then
             patch -p1 < shellcheck-fixes.patch
           fi
           rm -f shellcheck-fixes.patch
+
+      - name: Pull latest changes to prevent non-fast-forward errors
+        run: |
+          git config pull.rebase true
+          git pull origin ${{ github.head_ref || github.ref_name }}
 
       - name: Commit auto-remediations
         uses: stefanzweifel/git-auto-commit-action@v7
@@ -53,6 +59,7 @@ jobs:
           commit_message: "chore: fully automated shfmt and shellcheck fixes"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_author: "77777kaz77777 <153332224+77777kaz77777@users.noreply.github.com>"
 
       - name: Run ShellCheck (Strict Errors Only)
         run: |

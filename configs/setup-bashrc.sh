@@ -1,17 +1,14 @@
-# This script safely installs the custom .bashrc configuration and aliases.
-
 #!/usr/bin/env bash
 # Description: Terminal configuration and custom bash aliases
-
 
 TARGET="$HOME/.bashrc"
 
 if [ -f "$TARGET" ]; then
-    echo "Backing up existing .bashrc to ~/.bashrc.bak..."
-    cp "$TARGET" "$HOME/.bashrc.bak"
+  echo "Backing up existing .bashrc to ~/.bashrc.bak..."
+  cp "$TARGET" "$HOME/.bashrc.bak"
 fi
 
-cat << 'EOF' > "$TARGET"
+cat <<'EOF' >"$TARGET"
 # .bashrc
 
 # Source global definitions

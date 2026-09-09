@@ -33,7 +33,7 @@ jobs:
               - "./security/clamav-nightly-scan.sh"
               - "./security/run-clamav-scan.sh"
               - "./security/update-clamav-signatures.sh"
-              - "./utils/osi-security-overview.sh"
+              - "./security/osi-security-overview.sh"
               - "./configs/setup-bashrc.sh"
               - "./configs/setup-alacritty.sh"
 

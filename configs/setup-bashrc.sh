@@ -1,3 +1,17 @@
+# This script safely installs the custom .bashrc configuration and aliases.
+
+#!/usr/bin/env bash
+# Description: Terminal configuration and custom bash aliases
+
+
+TARGET="$HOME/.bashrc"
+
+if [ -f "$TARGET" ]; then
+    echo "Backing up existing .bashrc to ~/.bashrc.bak..."
+    cp "$TARGET" "$HOME/.bashrc.bak"
+fi
+
+cat << 'EOF' > "$TARGET"
 # .bashrc
 
 # Source global definitions
@@ -24,7 +38,6 @@ if [ -d ~/.bashrc.d ]; then
 fi
 unset rc
 
-
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
@@ -44,6 +57,8 @@ alias l='ls -CF'
 alias c='clear'
 alias u='sudo update'
 alias g='ssh -T git@github.com'
-alias s='sudo shudown now'
+alias s='sudo shutdown now'
 export PS1="\u@\h:\w\$ "
+EOF
 
+echo ".bashrc has been successfully updated and configured."

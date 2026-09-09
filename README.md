@@ -64,7 +64,6 @@ The repository also demonstrates practical implementations of infrastructure man
 | `fedora_rog_setup.sh` | Optimization and Setup Script for ASUS ROG Zephyrus G15 on Fedora 44 KDE |
 | `manage-vpn.sh` | Quick toggle script to bring WireGuard connections up or down using WG-Quick. |
 | `organize_scripts.py` | This script scans a local directory of bash scripts, uses a local LLM via LM Studio to analyze and categorize each one, and compiles the metadata into a JSON manifest file. |
-| `osi-security-overview.sh` | Custom reference utility that provides a breakdown of security at each OSI layer. |
 | `setup.py` | (Work in Progress) Automated Python workstation bootstrap, toolstack installer, and repository script deployment with GUI. |
 | `system-health-report.sh` | Diagnostic script that generates a quick report on system health, disk usage, and failed Systemd services. |
 | `toggle-tailscale.sh` | Script to easily toggle Tailscale connections, including a prompt for selecting an exit node. |

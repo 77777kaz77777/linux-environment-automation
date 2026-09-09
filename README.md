@@ -36,6 +36,8 @@ The repository also demonstrates practical implementations of infrastructure man
 | `clamav-scan.service` | Systemd service unit responsible for executing the nightly ClamAV scan. |
 | `clamav-scan.timer` | Systemd timer unit that schedules the ClamAV scans to run at 2:00 AM |
 | `harden-cachyos.sh` | Hardening script to apply firewall, AppArmor, and sysctl security tweaks on CachyOS. |
+| `osi-security-overview.sh` | Custom reference utility that provides a breakdown of security at each OSI layer. |
+| `port-scanner.py` | Educational multi-threaded TCP socket scanner (College Project) |
 | `run-clamav-scan.sh` |  |
 | `setup-clamav-fedora.sh` | Automated script to install and set up ClamAV on Fedora. |
 | `update-clamav-signatures.sh` | Script to manually trigger Freshclam and update antivirus signatures. |

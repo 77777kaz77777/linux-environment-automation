@@ -66,7 +66,6 @@ The repository also demonstrates practical implementations of infrastructure man
 | `organize_scripts.py` | This script scans a local directory of bash scripts, uses a local LLM via LM Studio to analyze and categorize each one, and compiles the metadata into a JSON manifest file. |
 | `osi-security-overview.sh` | Custom reference utility that provides a breakdown of security at each OSI layer. |
 | `port-scanner.py` | Educational multi-threaded TCP socket scanner (College Project) |
-| `setup-alacritty.sh` | Automates Alacritty installation, font setup, and configuration for Fedora |
 | `setup.py` | (Work in Progress) Automated Python workstation bootstrap, toolstack installer, and repository script deployment with GUI. |
 | `system-health-report.sh` | Diagnostic script that generates a quick report on system health, disk usage, and failed Systemd services. |
 | `toggle-tailscale.sh` | Script to easily toggle Tailscale connections, including a prompt for selecting an exit node. |

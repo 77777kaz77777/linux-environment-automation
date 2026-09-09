@@ -6,17 +6,17 @@ set -e
 
 DRY_RUN=0
 if [[ "$1" == "--dry-run" ]]; then
-    DRY_RUN=1
-    echo "=== DRY RUN MODE ACTIVE - No changes will be made ==="
+  DRY_RUN=1
+  echo "=== DRY RUN MODE ACTIVE - No changes will be made ==="
 fi
 
 # Wrapper function to intercept standard commands
 run_cmd() {
-    if [[ "$DRY_RUN" -eq 1 ]]; then
-        echo "[DRY RUN] Would execute: $*"
-    else
-        "$@"
-    fi
+  if [[ "$DRY_RUN" -eq 1 ]]; then
+    echo "[DRY RUN] Would execute: $*"
+  else
+    "$@"
+  fi
 }
 
 echo "Step 1: Installing Alacritty..."
@@ -33,9 +33,9 @@ echo "Step 3: Applying the Alacritty Configuration..."
 run_cmd mkdir -p ~/.config/alacritty
 
 if [[ "$DRY_RUN" -eq 1 ]]; then
-    echo "[DRY RUN] Would write configuration block to: ~/.config/alacritty/alacritty.toml"
+  echo "[DRY RUN] Would write configuration block to: ~/.config/alacritty/alacritty.toml"
 else
-cat << 'EOF' > ~/.config/alacritty/alacritty.toml
+  cat <<'EOF' >~/.config/alacritty/alacritty.toml
 # Alacritty terminal configuration
 # =====================================================================
 # ALACRITTY - MATTE BLACK HARDWARE INTERFACE (FULL PRO CONFIGURATION)

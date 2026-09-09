@@ -31,6 +31,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y shfmt shellcheck patch dos2unix
 
+      - name: Pull latest changes before modifying files
+        run: |
+          git config pull.rebase true
+          git pull origin ${{ github.head_ref || github.ref_name }}
+
       - name: Auto-format Bash scripts (shfmt)
         run: |
           find . -type f -name "*.sh" -exec shfmt -w -i 2 -ci {} +
@@ -47,11 +52,6 @@ jobs:
             patch -p1 < shellcheck-fixes.patch
           fi
           rm -f shellcheck-fixes.patch
-
-      - name: Pull latest changes to prevent non-fast-forward errors
-        run: |
-          git config pull.rebase true
-          git pull origin ${{ github.head_ref || github.ref_name }}
 
       - name: Commit auto-remediations
         uses: stefanzweifel/git-auto-commit-action@v7

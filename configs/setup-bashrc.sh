@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Description: Terminal configuration and custom bash aliases
+# safely installs the custom .bashrc configuration and aliases.
 
 TARGET="$HOME/.bashrc"
 

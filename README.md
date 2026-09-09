@@ -33,7 +33,7 @@ The repository also demonstrates practical implementations of infrastructure man
 
 | File | Description |
 |---|---|
-| `clamav-nightly-scan.sh` | Create log folder if missing |
+| `clamav-nightly-scan.sh` | ClamAV scan script designed to run nightly. |
 | `clamav-scan.service` | Systemd service unit responsible for executing the nightly ClamAV scan. |
 | `clamav-scan.timer` | Systemd timer unit that schedules the ClamAV scans to run at 2:00 AM |
 | `harden-cachyos.sh` | Hardening script to apply firewall, AppArmor, and sysctl security tweaks on CachyOS. |

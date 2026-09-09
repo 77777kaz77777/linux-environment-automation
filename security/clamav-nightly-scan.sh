@@ -1,4 +1,5 @@
 #!/bin/bash
+## ClamAV scan script designed to run nightly.
 LOGFILE="/var/log/clamav/daily_scan.log"
 
 # Create log folder if missing

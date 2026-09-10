@@ -37,13 +37,13 @@ dnf clean all
 if command -v flatpak &>/dev/null; then
   echo -e "\n${GREEN}[2/4] Removing unused Flatpak runtimes...${RESET}"
   flatpak uninstall --unused --system -y
-  
+
   # Clean user-level runtimes
   if [[ "$TARGET_USER" != "root" ]]; then
     TARGET_UID=$(id -u "$TARGET_USER")
     sudo -u "$TARGET_USER" env XDG_RUNTIME_DIR="/run/user/$TARGET_UID" \
-         DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$TARGET_UID/bus" \
-         flatpak uninstall --unused --user -y || true
+      DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$TARGET_UID/bus" \
+      flatpak uninstall --unused --user -y || true
   fi
 fi
 

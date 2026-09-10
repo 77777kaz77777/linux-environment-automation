@@ -126,12 +126,12 @@ white   = "#ffffff"
 # Handy layout mapping for basic quality of life terminal actions
 [[keyboard.bindings]]
 key = "V"
-mods = "Control"
+mods = "Control|Shift"
 action = "Paste"
 
 [[keyboard.bindings]]
 key = "C"
-mods = "Control"
+mods = "Control|Shift"
 action = "Copy"
 
 [[keyboard.bindings]]

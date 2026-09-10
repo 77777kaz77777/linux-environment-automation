@@ -34,14 +34,14 @@ fi
 
 log_message "=== Starting Fedora $FEDORA_VERSION KDE Plasma Debloat & Cleanup ==="
 
-# Define DNF options: strict=0 ensures the command succeeds even if a target package is already uninstalled.
-DNF_OPTS="--setopt=strict=0 -y"
+# Define DNF options properly as an array to prevent word-splitting and parsing errors
+DNF_OPTS=(--setopt=strict=0 -y)
 
 # -----------------------------------------------------------------------------
 # 1. Remove KDE PIM (Personal Information Management) & Akonadi
 # -----------------------------------------------------------------------------
 log_message "Removing KDE PIM stack (KMail, KOrganizer, Kontact) and Akonadi..."
-dnf remove "$DNF_OPTS" \
+dnf remove "${DNF_OPTS[@]}" \
   akonadi \
   akonadi-server \
   kmail \
@@ -56,7 +56,7 @@ dnf remove "$DNF_OPTS" \
 # 2. Remove Redundant Utilities, Media Players, Games & Extra Apps
 # -----------------------------------------------------------------------------
 log_message "Removing unnecessary default desktop applications and extra bloat..."
-dnf remove "$DNF_OPTS" \
+dnf remove "${DNF_OPTS[@]}" \
   dragonplayer \
   elisa-player \
   kmahjongg \
@@ -84,7 +84,7 @@ dnf remove "$DNF_OPTS" \
 # 3. Remove Office Suites (LibreOffice / OpenOffice)
 # -----------------------------------------------------------------------------
 log_message "Removing LibreOffice and OpenOffice components..."
-dnf remove "$DNF_OPTS" \
+dnf remove "${DNF_OPTS[@]}" \
   libreoffice \
   libreoffice-core \
   libreoffice-writer \

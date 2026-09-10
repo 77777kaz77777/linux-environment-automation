@@ -19,81 +19,84 @@ FEDORA_VERSION=$(grep -oP '(?<=^VERSION_ID=).*' /etc/os-release | tr -d '"' 2>/d
 
 # Logger Function
 log_message() {
-  local TIMESTAMP
-  TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
-  echo -e "[$TIMESTAMP] $1" | tee -a "$LOGFILE"
+    local TIMESTAMP
+    TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
+    echo "[$TIMESTAMP] $1" | tee -a "$LOGFILE"
 }
 
 # -----------------------------------------------------------------------------
 # Privilege Check
 # -----------------------------------------------------------------------------
 if [[ $EUID -ne 0 ]]; then
-  echo "[ERROR] This cleanup script must be run as root or via sudo." >&2
-  exit 1
+    echo "[ERROR] This cleanup script must be run as root or via sudo." >&2
+    exit 1
 fi
 
 log_message "=== Starting Fedora $FEDORA_VERSION KDE Plasma Debloat & Cleanup ==="
+
+# Define DNF options: strict=0 ensures the command succeeds even if a target package is already uninstalled.
+DNF_OPTS="--setopt=strict=0 -y"
 
 # -----------------------------------------------------------------------------
 # 1. Remove KDE PIM (Personal Information Management) & Akonadi
 # -----------------------------------------------------------------------------
 log_message "Removing KDE PIM stack (KMail, KOrganizer, Kontact) and Akonadi..."
-dnf remove -y \
-  akonadi \
-  akonadi-server \
-  kmail \
-  korganizer \
-  kaddressbook \
-  kontact \
-  knotes \
-  akregator \
-  kdepim-runtime 2>&1 | tee -a "$LOGFILE" || true
+dnf remove $DNF_OPTS \
+    akonadi \
+    akonadi-server \
+    kmail \
+    korganizer \
+    kaddressbook \
+    kontact \
+    knotes \
+    akregator \
+    kdepim-runtime 2>&1 | tee -a "$LOGFILE"
 
 # -----------------------------------------------------------------------------
 # 2. Remove Redundant Utilities, Media Players, Games & Extra Apps
 # -----------------------------------------------------------------------------
 log_message "Removing unnecessary default desktop applications and extra bloat..."
-dnf remove -y \
-  dragonplayer \
-  elisa-player \
-  kmahjongg \
-  kmines \
-  ksudoku \
-  kpat \
-  konversation \
-  kmag \
-  kmousetool \
-  kwrite \
-  krdc \
-  krfb \
-  fedora-media-writer \
-  ktorrent \
-  falkon \
-  konqueror \
-  kamoso \
-  skanlite \
-  skanpage \
-  neochat \
-  tokodon \
-  kget 2>&1 | tee -a "$LOGFILE" || true
+dnf remove $DNF_OPTS \
+    dragonplayer \
+    elisa-player \
+    kmahjongg \
+    kmines \
+    ksudoku \
+    kpat \
+    konversation \
+    kmag \
+    kmousetool \
+    kwrite \
+    krdc \
+    krfb \
+    fedora-media-writer \
+    ktorrent \
+    falkon \
+    konqueror \
+    kamoso \
+    skanlite \
+    skanpage \
+    neochat \
+    tokodon \
+    kget 2>&1 | tee -a "$LOGFILE"
 
 # -----------------------------------------------------------------------------
 # 3. Remove Office Suites (LibreOffice / OpenOffice)
 # -----------------------------------------------------------------------------
 log_message "Removing LibreOffice and OpenOffice components..."
-dnf remove -y \
-  libreoffice \
-  libreoffice-core \
-  libreoffice-writer \
-  libreoffice-calc \
-  libreoffice-impress \
-  libreoffice-draw \
-  libreoffice-math \
-  libreoffice-base \
-  libreoffice-emailmerge \
-  libreoffice-gtk3 \
-  libreoffice-help-en \
-  openoffice* 2>&1 | tee -a "$LOGFILE" || true
+dnf remove $DNF_OPTS \
+    libreoffice \
+    libreoffice-core \
+    libreoffice-writer \
+    libreoffice-calc \
+    libreoffice-impress \
+    libreoffice-draw \
+    libreoffice-math \
+    libreoffice-base \
+    libreoffice-emailmerge \
+    libreoffice-gtk3 \
+    libreoffice-help-en \
+    openoffice* 2>&1 | tee -a "$LOGFILE"
 
 # -----------------------------------------------------------------------------
 # 4. Clean DNF Packages, Orphans, and System Caches
@@ -111,27 +114,31 @@ journalctl --vacuum-time=7d 2>&1 | tee -a "$LOGFILE"
 # 5. Flatpak Cleanup
 # -----------------------------------------------------------------------------
 if command -v flatpak >/dev/null 2>&1; then
-  log_message "Removing unused Flatpak runtimes and applications..."
-  flatpak uninstall --unused -y 2>&1 | tee -a "$LOGFILE"
+    log_message "Removing unused Flatpak runtimes and applications..."
+    flatpak uninstall --unused -y 2>&1 | tee -a "$LOGFILE"
+    
+    log_message "Repairing Flatpak installations..."
+    flatpak repair 2>&1 | tee -a "$LOGFILE"
 else
-  log_message "Flatpak not installed. Skipping Flatpak cleanup."
+    log_message "Flatpak not installed. Skipping Flatpak cleanup."
 fi
 
 # -----------------------------------------------------------------------------
 # 6. User-Level Cache Cleanup (KDE Sycoca and Thumbnail Cache)
 # -----------------------------------------------------------------------------
-TARGET_USER="${SUDO_USER:-$USER}"
-if [[ "$TARGET_USER" != "root" ]]; then
-  USER_HOME=$(getent passwd "$TARGET_USER" | cut -d: -f6)
+log_message "Cleaning KDE system configuration cache and thumbnails for all users..."
 
-  if [[ -n "$USER_HOME" && -d "$USER_HOME" ]]; then
-    log_message "Cleaning KDE system configuration cache for $TARGET_USER..."
-    rm -rf "${USER_HOME}/.cache/ksycoca"* 2>/dev/null || true
+# Iterate through all regular user directories in /home
+for user_dir in /home/*; do
+    if [[ -d "$user_dir" ]]; then
+        rm -rf "${user_dir}/.cache/ksycoca"* 2>/dev/null || true
+        rm -rf "${user_dir}/.cache/thumbnails"* 2>/dev/null || true
+    fi
+done
 
-    log_message "Cleaning image thumbnail cache..."
-    rm -rf "${USER_HOME}/.cache/thumbnails"* 2>/dev/null || true
-  fi
-fi
+# Clean root cache as well
+rm -rf /root/.cache/ksycoca* 2>/dev/null || true
+rm -rf /root/.cache/thumbnails* 2>/dev/null || true
 
 # -----------------------------------------------------------------------------
 # Completion

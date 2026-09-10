@@ -61,8 +61,8 @@ if command -v flatpak &>/dev/null; then
     TARGET_UID=$(id -u "$TARGET_USER")
     # Export required D-Bus and XDG environment variables for the target user session
     sudo -u "$TARGET_USER" env XDG_RUNTIME_DIR="/run/user/$TARGET_UID" \
-         DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$TARGET_UID/bus" \
-         flatpak update --user -y 2>&1 | tee -a "$LOGFILE" || true
+      DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$TARGET_UID/bus" \
+      flatpak update --user -y 2>&1 | tee -a "$LOGFILE" || true
   fi
 else
   log_message "Flatpak is not installed. Skipping Flatpak updates..."

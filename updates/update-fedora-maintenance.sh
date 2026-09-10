@@ -1,5 +1,5 @@
-#!/bin/bash
-# Full-system maintenance routine for Fedora, covering DNF/Flatpak updates and cache cleanup.
+#!/usr/bin/env bash
+# Full-system cleanup routine for Fedora (Caches, Orphans, Logs, KDE, Trash).
 # Exit on error, treat unset variables as error
 set -euo pipefail
 
@@ -22,59 +22,58 @@ TARGET_USER="${SUDO_USER:-$USER}"
 TARGET_HOME=$(getent passwd "$TARGET_USER" | cut -d: -f6)
 FEDORA_VERSION=$(grep -oP '(?<=^VERSION_ID=).*' /etc/os-release | tr -d '"' 2>/dev/null || echo "Fedora")
 
-echo -e "${BOLD}${CYAN}=== Starting Fedora $FEDORA_VERSION System Maintenance ===${RESET}\n"
+echo -e "${BOLD}${CYAN}=== Starting Fedora $FEDORA_VERSION System Cleanup ===${RESET}\n"
 
 # -----------------------------------------------------------------------------
-# 1. Update DNF Packages & System Flatpaks
+# 1. Package Cleanup & Orphan Removal
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}[1/5] Updating DNF packages and Flatpaks...${RESET}"
-dnf upgrade --refresh -y
-
-if command -v flatpak &>/dev/null; then
-  flatpak update -y
-
-  # Also update user-level Flatpaks if executed via sudo
-  if [[ "$TARGET_USER" != "root" ]]; then
-    sudo -u "$TARGET_USER" flatpak update -y || true
-  fi
-fi
-
-# -----------------------------------------------------------------------------
-# 2. Package Cleanup & Orphan Removal
-# -----------------------------------------------------------------------------
-echo -e "\n${GREEN}[2/5] Cleaning package manager caches and orphan packages...${RESET}"
+echo -e "${GREEN}[1/4] Cleaning package manager caches and orphan packages...${RESET}"
 dnf autoremove -y
 dnf clean all
 
 # -----------------------------------------------------------------------------
-# 3. Clean Flatpak Unused Runtimes
+# 2. Clean Flatpak Unused Runtimes
 # -----------------------------------------------------------------------------
 if command -v flatpak &>/dev/null; then
-  echo -e "\n${GREEN}[3/5] Removing unused Flatpak runtimes...${RESET}"
-  flatpak uninstall --unused -y
+  echo -e "\n${GREEN}[2/4] Removing unused Flatpak runtimes...${RESET}"
+  flatpak uninstall --unused --system -y
+  
+  # Clean user-level runtimes
+  if [[ "$TARGET_USER" != "root" ]]; then
+    TARGET_UID=$(id -u "$TARGET_USER")
+    sudo -u "$TARGET_USER" env XDG_RUNTIME_DIR="/run/user/$TARGET_UID" \
+         DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$TARGET_UID/bus" \
+         flatpak uninstall --unused --user -y || true
+  fi
 fi
 
 # -----------------------------------------------------------------------------
-# 4. Clear Systemd Logs & User KDE Plasma Cache
+# 3. Clear Systemd Logs & User KDE Plasma Cache
 # -----------------------------------------------------------------------------
-echo -e "\n${GREEN}[4/5] Clearing old systemd logs and KDE Plasma cache...${RESET}"
+echo -e "\n${GREEN}[3/4] Clearing old systemd logs and KDE Plasma cache...${RESET}"
 journalctl --vacuum-time=7d
 
 if [[ "$TARGET_USER" != "root" && -d "$TARGET_HOME" ]]; then
   echo "Cleaning user cache for $TARGET_USER..."
-  rm -rf "${TARGET_HOME}/.cache/kiconcache"* 2>/dev/null || true
-  rm -rf "${TARGET_HOME}/.cache/kioexec/" 2>/dev/null || true
-  rm -rf "${TARGET_HOME}/.cache/ksycoca"* 2>/dev/null || true
-  rm -rf "${TARGET_HOME}/.cache/plasma"* 2>/dev/null || true
+  # Executing file removals strictly as the target user to avoid modifying cache permissions
+  sudo -u "$TARGET_USER" bash -c "
+    rm -rf '${TARGET_HOME}/.cache/kiconcache'* 2>/dev/null || true
+    rm -rf '${TARGET_HOME}/.cache/kioexec/' 2>/dev/null || true
+    rm -rf '${TARGET_HOME}/.cache/ksycoca'* 2>/dev/null || true
+    rm -rf '${TARGET_HOME}/.cache/plasma'* 2>/dev/null || true
+  "
 fi
 
 # -----------------------------------------------------------------------------
-# 5. Empty User Trash
+# 4. Empty User Trash
 # -----------------------------------------------------------------------------
-echo -e "\n${GREEN}[5/5] Emptying Trash for $TARGET_USER...${RESET}"
+echo -e "\n${GREEN}[4/4] Emptying Trash for $TARGET_USER...${RESET}"
 if [[ "$TARGET_USER" != "root" && -d "${TARGET_HOME}/.local/share/Trash" ]]; then
-  rm -rf "${TARGET_HOME}/.local/share/Trash/files/"* 2>/dev/null || true
-  rm -rf "${TARGET_HOME}/.local/share/Trash/info/"* 2>/dev/null || true
+  # Sudo execution prevents creating root-owned files in the user's trash directory during failures
+  sudo -u "$TARGET_USER" bash -c "
+    rm -rf '${TARGET_HOME}/.local/share/Trash/files/'* 2>/dev/null || true
+    rm -rf '${TARGET_HOME}/.local/share/Trash/info/'* 2>/dev/null || true
+  "
 fi
 
-echo -e "\n${BOLD}${GREEN}✔ System maintenance completed successfully!${RESET}"
+echo -e "\n${BOLD}${GREEN}✔ System cleanup completed successfully!${RESET}"

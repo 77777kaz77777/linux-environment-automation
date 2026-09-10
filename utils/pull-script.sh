@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Description: Interactively pulls and downloads an individual shell script from
-# a specified folder within the remote GitHub repository, then makes it executable.
+# Description: Interactively pulls and downloads an individual shell script from  a specified folder within the remote GitHub repository, then makes it executable.
 
 # Configuration
 REPO_OWNER="77777kaz77777"

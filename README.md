@@ -52,7 +52,7 @@ The repository also demonstrates practical implementations of infrastructure man
 | `debloat-fedora-kde.sh` | Script to remove Akonadi/PIM bloat, unused media tools, office suites, and clear caches on Fedora KDE. |
 | `system-cleanup.sh` | Safe cleanup script for wiping temporary files and old system logs |
 | `update-arch.sh` | Automated system maintenance and update script for Arch Linux and CachyOS. |
-| `update-fedora-maintenance.sh` | Full-system maintenance routine for Fedora, covering DNF/Flatpak updates and cache cleanup. |
+| `update-fedora-maintenance.sh` | Full-system cleanup routine for Fedora (Caches, Orphans, Logs, KDE, Trash). |
 | `update-fedora.sh` | Automated system maintenance, backup, and upgrade script designed for Fedora KDE. |
 | `update-mint.sh` | Automated system update script for Debian/Mint handling APT, Flatpaks, and cleanups. |
 | `update-ubuntu.sh` | Automated system update and maintenance script tailored for Ubuntu and Debian. |

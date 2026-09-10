@@ -353,7 +353,7 @@ fastestmirror=True
         if self.opt_github.get():
             self.log("[+] Deploying GitHub maintenance scripts...")
             if shutil.which("git"):
-                repo_url = "https://github.com/77777kaz77777/linux-maintenance-and-dotfiles.git"
+                repo_url = "https://github.com/77777kaz77777/linux-environment-automation.git"
                 tmp_dir = tempfile.mkdtemp()
                 if self.run_cmd(f"git clone --depth 1 {repo_url} {tmp_dir}", "GitHub Clone"):
                     

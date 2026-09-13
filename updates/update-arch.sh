@@ -10,7 +10,7 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-# Determine the actual non-root user who invoked sudo (for Flatpaks/AUR)
+# Determine the actual non-root user who invoked sudo (for Flatpaks)
 REAL_USER="${SUDO_USER:-$USER}"
 
 # Log file configuration
@@ -57,7 +57,11 @@ else
   pacman -Sc --noconfirm 2>&1 | tee -a "$LOGFILE"
 fi
 
-# 4. Update Flatpak applications (System + User level)
+# 4. Clean up systemd journal logs
+log_message "Vacuuming systemd journal (retaining last 2 weeks)..."
+journalctl --vacuum-time=2weeks 2>&1 | tee -a "$LOGFILE"
+
+# 5. Update Flatpak applications (System + User level)
 if command -v flatpak &>/dev/null; then
   log_message "Updating Flatpak applications..."
   flatpak update -y 2>&1 | tee -a "$LOGFILE"
@@ -72,6 +76,17 @@ if command -v flatpak &>/dev/null; then
   fi
 else
   log_message "Flatpak is not installed. Skipping..."
+fi
+
+# 6. Check for .pacnew and .pacsave files
+log_message "Checking for .pacnew and .pacsave files requiring manual intervention..."
+PACFILES=$(find /etc -type f \( -name "*.pacnew" -o -name "*.pacsave" \) 2>/dev/null || true)
+if [[ -n "$PACFILES" ]]; then
+  log_message "WARNING: Found configuration files that require manual merging:"
+  echo "$PACFILES" | tee -a "$LOGFILE"
+  log_message "Use a tool like pacdiff to review and merge them."
+else
+  log_message "No .pacnew or .pacsave files found."
 fi
 
 # Completion message

@@ -415,17 +415,46 @@ fastestmirror=True
             
             # 1. Shell Aliases logic
             bashrc_path = Path(self.sys_mgr.real_home) / ".bashrc"
+            bashrc_bak_path = Path(self.sys_mgr.real_home) / ".bashrc.bak"
             try:
                 if bashrc_path.exists():
-                    content = bashrc_path.read_text()
-                    if "# Shell aliases & shortcuts" not in content:
-                        aliases_block = r"""
-# Shell aliases & shortcuts
+                    shutil.copy2(bashrc_path, bashrc_bak_path)
+                    shutil.chown(bashrc_bak_path, user=self.sys_mgr.real_user)
+                    self.log("[+] Backed up existing .bashrc to .bashrc.bak")
+
+                bashrc_content = r"""# .bashrc
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+fi
+
+# User specific environment
+if ! [[ "$PATH" =~ "$HOME/.local/bin:$HOME/bin:" ]]; then
+    PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+fi
+export PATH
+
+# Uncomment the following line if you don't like systemctl's auto-paging feature:
+# export SYSTEMD_PAGER=
+
+# User specific aliases and functions
+if [ -d ~/.bashrc.d ]; then
+    for rc in ~/.bashrc.d/*; do
+        if [ -f "$rc" ]; then
+            . "$rc"
+        fi
+    done
+fi
+unset rc
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
     alias ls='ls --color=auto'
+    #alias dir='dir --color=auto'
+    #alias vdir='vdir --color=auto'
+
     alias grep='grep --color=auto'
     alias fgrep='fgrep --color=auto'
     alias egrep='egrep --color=auto'
@@ -439,12 +468,16 @@ alias c='clear'
 alias u='sudo update'
 alias g='ssh -T git@github.com'
 alias s='sudo shutdown now'
+export PS1="\u@\h:\w\$ "
 """
-                        with open(bashrc_path, "a") as f:
-                            f.write("\n" + aliases_block)
-                        self.log("[✔] Shell aliases appended to .bashrc")
-                    else:
-                        self.log("[=] Shell aliases already present in .bashrc")
+                with open(bashrc_path, "w") as f:
+                    f.write(bashrc_content)
+                
+                shutil.chown(bashrc_path, user=self.sys_mgr.real_user)
+                self.log("[✔] Shell aliases and full .bashrc configuration applied")
+                
+                # Source the modified .bashrc for the current user
+                self.run_cmd(f"su - {self.sys_mgr.real_user} -s /bin/bash -c 'source ~/.bashrc'", "Sourced ~/.bashrc for user sub-processes")
             except Exception as e:
                 self.log(f"[✘] Failed to update .bashrc with aliases: {e}")
 

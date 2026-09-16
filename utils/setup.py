@@ -305,7 +305,13 @@ fastestmirror=True
         if self.opt_debloat.get():
             self.log(f"[+] Executing tailored debloat for {self.sys_mgr.de.upper()} on {self.sys_mgr.distro}...")
             universal_bloat = ["thunderbird", "libreoffice-core", "libreoffice-writer", "libreoffice-calc", "libreoffice-impress"]
-            kde_bloat = ["akonadi", "kmail", "dragonplayer", "kmines", "fedora-media-writer"]
+            kde_bloat = [
+                "akonadi", "kmail", "kontact", "korganizer", "kaddressbook",
+                "akregator", "pim-data-exporter", "kfind", "kleopatra",
+                "kmouth", "ktnef", "dragon", "dragonplayer", "elisa-player", 
+                "kamoso", "kmahjongg", "kmines", "kpat", "krdc", "krfb", 
+                "fedora-media-writer"
+            ]
             gnome_bloat = ["gnome-tour", "epiphany-browser", "gnome-weather", "gnome-clocks", "gnome-maps", "totem", "cheese"]
             cosmic_bloat = ["totem", "evince", "gnome-calendar", "cheese"]
             cinnamon_bloat = ["rhythmbox", "totem", "hexchat"]

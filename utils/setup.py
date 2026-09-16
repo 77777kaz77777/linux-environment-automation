@@ -430,6 +430,9 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 alias c='clear'
+alias u='sudo update'
+alias g='ssh -T git@github.com'
+alias s='sudo shutdown now'
 """
                         with open(bashrc_path, "a") as f:
                             f.write("\n" + aliases_block)
@@ -612,12 +615,12 @@ white   = "#ffffff"
 
 [[keyboard.bindings]]
 key = "V"
-mods = "Control"
+mods = "Control|Shift"
 action = "Paste"
 
 [[keyboard.bindings]]
 key = "C"
-mods = "Control"
+mods = "Control|Shift"
 action = "Copy"
 
 [[keyboard.bindings]]

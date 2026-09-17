@@ -40,6 +40,22 @@ class SystemManager:
         return distro
 
     def _detect_desktop_environment(self):
+        # Sudo strips environment variables, so inspect running processes first safely
+        try:
+            # Using a list format prevents shell parsing errors
+            processes = subprocess.check_output(["ps", "aux"], text=True).lower()
+            if "plasmashell" in processes or "kwin_wayland" in processes or "kwin_x11" in processes:
+                return "kde"
+            if "gnome-shell" in processes:
+                return "gnome"
+            if "cinnamon" in processes:
+                return "cinnamon"
+            if "cosmic-comp" in processes or "cosmic-session" in processes:
+                return "cosmic"
+        except Exception:
+            pass
+
+        # Fallback to standard environment variables if processes aren't matched
         desktop = os.environ.get("XDG_CURRENT_DESKTOP", "").lower()
         session = os.environ.get("DESKTOP_SESSION", "").lower()
         combined = f"{desktop} {session}"
@@ -115,8 +131,7 @@ class SystemManager:
             subprocess.run(f'echo "deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] {ts_apt_url}" > /etc/apt/sources.list.d/tailscale.list', shell=True)
             subprocess.run(self.update_cmd, shell=True)
         else:
-            logger(f"Repository auto-config is not supported for {self.pkg_mgr}. Will attempt standard repository installations or skip specific packages.")
-
+            logger(f"Repository auto-config is not supported for {self.pkg_mgr}.")
 
 class InstallerGUI(tk.Tk):
     def __init__(self):
@@ -299,8 +314,8 @@ fastestmirror=True
                 spectacle = "spectacle" if self.sys_mgr.pkg_mgr != "apt" else "kde-spectacle"
                 packages.append(spectacle)
 
-            for pkg in packages:
-                self.run_cmd(f"{self.sys_mgr.install_cmd} {pkg}", pkg.title())
+            pkg_string = " ".join(packages)
+            self.run_cmd(f"{self.sys_mgr.install_cmd} {pkg_string}", "Core Packages Installation")
 
         if self.opt_debloat.get():
             self.log(f"[+] Executing tailored debloat for {self.sys_mgr.de.upper()} on {self.sys_mgr.distro}...")
@@ -310,23 +325,49 @@ fastestmirror=True
                 "akregator", "pim-data-exporter", "kfind", "kleopatra",
                 "kmouth", "ktnef", "dragon", "dragonplayer", "elisa-player", 
                 "kamoso", "kmahjongg", "kmines", "kpat", "krdc", "krfb", 
-                "fedora-media-writer"
+                "fedora-media-writer", "kdepim-addons", "kmail-account-wizard",
+                "neochat", "kwrite", "pim-sieve-editor", "kdepim-runtime"
             ]
             gnome_bloat = ["gnome-tour", "epiphany-browser", "gnome-weather", "gnome-clocks", "gnome-maps", "totem", "cheese"]
             cosmic_bloat = ["totem", "evince", "gnome-calendar", "cheese"]
             cinnamon_bloat = ["rhythmbox", "totem", "hexchat"]
             apt_bloat = ["snapd", "gnome-software-plugin-snap"]
 
-            remove_list = universal_bloat
+            remove_list = list(universal_bloat)
             if self.sys_mgr.de == "kde": remove_list += kde_bloat
             if self.sys_mgr.de == "gnome": remove_list += gnome_bloat
             if self.sys_mgr.de == "cosmic": remove_list += cosmic_bloat
             if self.sys_mgr.de == "cinnamon": remove_list += cinnamon_bloat
             if self.sys_mgr.pkg_mgr == "apt": remove_list += apt_bloat
 
-            for pkg in remove_list:
-                subprocess.run(f"{self.sys_mgr.remove_cmd} {pkg}", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            # Use a list of arguments for safe subprocess execution
+            check_args = []
+            if self.sys_mgr.pkg_mgr in ["dnf4", "dnf5", "zypper"]:
+                check_args = ["rpm", "-q"]
+            elif self.sys_mgr.pkg_mgr == "apt":
+                check_args = ["dpkg", "-l"]
+            elif self.sys_mgr.pkg_mgr == "pacman":
+                check_args = ["pacman", "-Qq"]
+
+            # Filter remove_list to only include packages actually installed on the system
+            valid_remove_list = []
+            if check_args:
+                for pkg in remove_list:
+                    # check_args + [pkg] creates a safe list like ["rpm", "-q", "kmail"]
+                    result = subprocess.run(check_args + [pkg], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    if result.returncode == 0:
+                        valid_remove_list.append(pkg)
+            else:
+                valid_remove_list = remove_list
+
+            if valid_remove_list:
+                pkg_string = " ".join(valid_remove_list)
+                self.log(f"[*] Removing ({len(valid_remove_list)}) confirmed installed packages:\n    {pkg_string}")
+                self.run_cmd(f"{self.sys_mgr.remove_cmd} {pkg_string}", "Targeted Debloat Removal")
+            else:
+                self.log("[=] No matching bloatware packages found on the system.")
             
+            # Execute automated system cleanup
             if self.sys_mgr.pkg_mgr in ["dnf4", "dnf5"]:
                 base_cmd = "dnf5" if self.sys_mgr.pkg_mgr == "dnf5" else "dnf"
                 self.run_cmd(f"{base_cmd} autoremove -y && {base_cmd} clean all", "DNF Cleanup")
@@ -339,9 +380,18 @@ fastestmirror=True
             self.log("[+] Installing Flatpaks & Trayscale...")
             if shutil.which("flatpak"):
                 self.run_cmd("flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo", "Flathub Remote")
-                self.run_cmd("flatpak install -y flathub ai.lmstudio.lm-studio", "LM Studio")
-                self.run_cmd("flatpak install -y flathub io.podman_desktop.PodmanDesktop", "Podman Desktop")
-                self.run_cmd("flatpak install -y flathub org.nmap.Zenmap", "Zenmap")
+                
+                flatpaks = {
+                    "LM Studio": "ai.lmstudio.lm-studio",
+                    "Podman Desktop": "io.podman_desktop.PodmanDesktop",
+                    "Zenmap": "org.nmap.Zenmap"
+                }
+                
+                for name, app_id in flatpaks.items():
+                    if subprocess.run(f"flatpak list | grep -qi {app_id}", shell=True).returncode != 0:
+                        self.run_cmd(f"flatpak install -y flathub {app_id}", name)
+                    else:
+                        self.log(f"[=] {name} is already installed.")
                 
                 if not shutil.which("trayscale") and subprocess.run("flatpak list | grep -qi dev.deedles.Trayscale", shell=True).returncode != 0:
                     if not self.run_cmd("flatpak install -y flathub dev.deedles.Trayscale", "Trayscale (Flatpak)"):
@@ -475,9 +525,6 @@ export PS1="\u@\h:\w\$ "
                 
                 shutil.chown(bashrc_path, user=self.sys_mgr.real_user)
                 self.log("[✔] Shell aliases and full .bashrc configuration applied")
-                
-                # Source the modified .bashrc for the current user
-                self.run_cmd(f"su - {self.sys_mgr.real_user} -s /bin/bash -c 'source ~/.bashrc'", "Sourced ~/.bashrc for user sub-processes")
             except Exception as e:
                 self.log(f"[✘] Failed to update .bashrc with aliases: {e}")
 
@@ -569,14 +616,14 @@ main "$@"
             alacritty_script_content = r"""#!/bin/bash
 set -euo pipefail
 
-# Download and install JetBrains Mono Nerd Font
-curl -LO https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip
-mkdir -p ~/.local/share/fonts/JetBrainsMono
-unzip -q -o JetBrainsMono.zip -d ~/.local/share/fonts/JetBrainsMono
-fc-cache -fv
-rm JetBrainsMono.zip
+if [ ! -d "$HOME/.local/share/fonts/JetBrainsMono" ]; then
+    curl -LO https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip
+    mkdir -p ~/.local/share/fonts/JetBrainsMono
+    unzip -q -o JetBrainsMono.zip -d ~/.local/share/fonts/JetBrainsMono
+    fc-cache -fv
+    rm JetBrainsMono.zip
+fi
 
-# Create Alacritty Configuration
 mkdir -p ~/.config/alacritty
 cat << 'EOF' > ~/.config/alacritty/alacritty.toml
 [general]
@@ -697,6 +744,7 @@ EOF
 
         self.log("--- Installation Sequence Complete ---")
         self.btn_start.config(state=tk.NORMAL)
+        self.log("\n[INFO] Run 'source ~/.bashrc' or open a new terminal tab to activate your updated aliases.")
         messagebox.showinfo("Complete", f"Deployment finished. Log saved to {os.path.abspath(LOG_FILE)}")
 
 if __name__ == "__main__":

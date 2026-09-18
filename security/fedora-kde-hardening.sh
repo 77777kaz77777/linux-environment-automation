@@ -5,8 +5,8 @@ set -euo pipefail
 
 # Ensure script is executed with superuser privileges
 if [[ "${EUID}" -ne 0 ]]; then
-    echo "[ERROR] This script must be run as root (or via sudo)." >&2
-    exit 1
+  echo "[ERROR] This script must be run as root (or via sudo)." >&2
+  exit 1
 fi
 
 LOG_FILE="/var/log/fedora44-hardening.log"
@@ -22,7 +22,7 @@ echo "================================================================="
 # ------------------------------------------------------------------------------
 echo "[1/3] Applying kernel & network stack sysctl hardening rules..."
 
-cat << 'EOF' > /etc/sysctl.d/99-security-hardening.conf
+cat <<'EOF' >/etc/sysctl.d/99-security-hardening.conf
 # Restrict kernel pointer access in /proc (Fedora defaults to 1, 2 is stricter)
 kernel.kptr_restrict = 2
 
@@ -44,7 +44,7 @@ net.ipv4.conf.all.send_redirects = 0
 net.ipv4.conf.default.send_redirects = 0
 EOF
 
-sysctl --system > /dev/null
+sysctl --system >/dev/null
 
 # ------------------------------------------------------------------------------
 # 2. Core Dump & System Limit Hardening
@@ -52,14 +52,14 @@ sysctl --system > /dev/null
 echo "[2/3] Disabling system core dumps..."
 
 mkdir -p /etc/systemd/coredump.conf.d
-cat << 'EOF' > /etc/systemd/coredump.conf.d/disable-coredump.conf
+cat <<'EOF' >/etc/systemd/coredump.conf.d/disable-coredump.conf
 [Coredump]
 Storage=none
 ProcessSizeMax=0
 EOF
 
 mkdir -p /etc/security/limits.d
-cat << 'EOF' > /etc/security/limits.d/99-disable-coredumps.conf
+cat <<'EOF' >/etc/security/limits.d/99-disable-coredumps.conf
 * hard core 0
 * soft core 0
 EOF
@@ -75,7 +75,7 @@ KDE_GLOBAL_CONFIG_DIR="/etc/xdg"
 
 # Force screen lock activation on system sleep/suspend
 mkdir -p "${KDE_GLOBAL_CONFIG_DIR}"
-cat << 'EOF' > "${KDE_GLOBAL_CONFIG_DIR}/kscreenlockerrc"
+cat <<'EOF' >"${KDE_GLOBAL_CONFIG_DIR}/kscreenlockerrc"
 [Daemon]
 Autolock=true
 Timeout=10
@@ -83,7 +83,7 @@ LockOnResume=true
 EOF
 
 # Disable automatic mounting of unknown storage devices while preserving KDE Connect SFTP mounts
-cat << 'EOF' > "${KDE_GLOBAL_CONFIG_DIR}/kded_device_automounterrc"
+cat <<'EOF' >"${KDE_GLOBAL_CONFIG_DIR}/kded_device_automounterrc"
 [GlobalSettings]
 automountEnabled=false
 automountOnLogin=false

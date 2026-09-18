@@ -36,7 +36,6 @@ jobs:
               - "./security/osi-security-overview.sh"
               - "./configs/setup-bashrc.sh"
               - "./configs/setup-alacritty.sh"
-              - "./security/fedora-kde-hardening.sh
 "
 
 

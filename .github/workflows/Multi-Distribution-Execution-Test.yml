@@ -1,3 +1,4 @@
+---
 name: Multi-Distribution Execution Test
 
 on:
@@ -16,7 +17,7 @@ permissions:
 jobs:
   test:
     name: Test on ${{ matrix.name }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -36,8 +37,8 @@ jobs:
               - "./configs/setup-bashrc.sh"
               - "./configs/setup-alacritty.sh"
 
-          - name: RedHat (Rocky 9)
-            image: rockylinux:9
+          - name: RedHat (Rocky Linux)
+            image: rockylinux:latest
             install: dnf install -y epel-release && dnf install -y --refresh python3 python3-pip git bash findutils grep sudo clamav
             scripts:
               - "./updates/update-fedora.sh"

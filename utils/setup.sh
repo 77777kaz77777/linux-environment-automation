@@ -175,7 +175,7 @@ if [[ "$CHOICES" == *"CORE"* ]]; then
   if [[ "$PKG_MGR" == "apt" ]]; then
     BRAVE_PKG="brave-browser"
   elif [[ "$PKG_MGR" == "pacman" ]]; then
-    BRAVE_PKG="brave-browser"
+    BRAVE_PKG="brave-origin"
   else
     BRAVE_PKG="brave-origin"
   fi

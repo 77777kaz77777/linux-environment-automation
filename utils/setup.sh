@@ -1,9 +1,11 @@
 #!/bin/bash
 #  Automated Linux workstation bootstrap, toolstack installer, repository deployment, and desktop setup.
 
+set -o pipefail
+
 LOG_FILE="workstation_install.log"
 
-if [ "$EUID" -ne 0 ]; then
+if [[ "$EUID" -ne 0 ]]; then
   echo "Privilege Error: This script must be run as root (sudo). Please relaunch with elevated privileges."
   exit 1
 fi
@@ -11,8 +13,7 @@ fi
 echo "=== Bash Workstation Installation Log ===" >"$LOG_FILE"
 
 log() {
-  echo -e "$1"
-  echo -e "$1" >>"$LOG_FILE"
+  echo -e "$1" | tee -a "$LOG_FILE"
 }
 
 # --- System Manager (OS, DE, Package Manager Detection) ---
@@ -20,7 +21,7 @@ DISTRO="unknown"
 OS_VERSION="9"
 OS_CODENAME="bullseye"
 
-if [ -f /etc/os-release ]; then
+if [[ -f /etc/os-release ]]; then
   # shellcheck disable=SC1091
   source /etc/os-release
   DISTRO="${ID:-unknown}"
@@ -29,7 +30,7 @@ if [ -f /etc/os-release ]; then
 fi
 
 REAL_USER="${SUDO_USER:-$USER}"
-REAL_HOME=$(eval echo "~$REAL_USER")
+REAL_HOME=$(getent passwd "$REAL_USER" | cut -d: -f6)
 
 # Detect Desktop Environment
 DE="generic"
@@ -104,7 +105,7 @@ CHOICES=$(whiptail --title "Linux Workstation Bootstrap Installer" \
   "DESKTOP" "Configure KDE Wallpaper (from Repo)" ON \
   3>&1 1>&2 2>&3)
 
-if [ -z "$CHOICES" ]; then
+if [[ -z "$CHOICES" ]]; then
   log "Installation cancelled by user."
   exit 0
 fi
@@ -142,15 +143,15 @@ EOF
     fi
 
     if [[ "$PKG_MGR" == "dnf5" ]]; then
-      [ ! -f /etc/yum.repos.d/brave-browser.repo ] && dnf5 config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo && rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc || true
-      [ ! -f /etc/yum.repos.d/sublime-text.repo ] && rpm --import https://download.sublimetext.com/sublimehq-pub.gpg && dnf5 config-manager addrepo --from-repofile=https://download.sublimetext.com/rpm/stable/x86_64/sublime-text.repo || true
-      [ ! -f /etc/yum.repos.d/tailscale.repo ] && dnf5 config-manager addrepo --from-repofile="$TS_REPO" || true
+      [[ ! -f /etc/yum.repos.d/brave-browser.repo ]] && dnf5 config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo && rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc || true
+      [[ ! -f /etc/yum.repos.d/sublime-text.repo ]] && rpm --import https://download.sublimetext.com/sublimehq-pub.gpg && dnf5 config-manager addrepo --from-repofile=https://download.sublimetext.com/rpm/stable/x86_64/sublime-text.repo || true
+      [[ ! -f /etc/yum.repos.d/tailscale.repo ]] && dnf5 config-manager addrepo --from-repofile="$TS_REPO" || true
       log "[✔] Configured DNF5 repositories."
     else
       $INSTALL_CMD dnf-plugins-core || true
-      [ ! -f /etc/yum.repos.d/brave-browser.repo ] && dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo && rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc || true
-      [ ! -f /etc/yum.repos.d/sublime-text.repo ] && rpm --import https://download.sublimetext.com/sublimehq-pub.gpg && dnf config-manager --add-repo https://download.sublimetext.com/rpm/stable/x86_64/sublime-text.repo || true
-      [ ! -f /etc/yum.repos.d/tailscale.repo ] && dnf config-manager --add-repo "$TS_REPO" || true
+      [[ ! -f /etc/yum.repos.d/brave-browser.repo ]] && dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo && rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc || true
+      [[ ! -f /etc/yum.repos.d/sublime-text.repo ]] && rpm --import https://download.sublimetext.com/sublimehq-pub.gpg && dnf config-manager --add-repo https://download.sublimetext.com/rpm/stable/x86_64/sublime-text.repo || true
+      [[ ! -f /etc/yum.repos.d/tailscale.repo ]] && dnf config-manager --add-repo "$TS_REPO" || true
       log "[✔] Configured DNF4 repositories."
     fi
 
@@ -163,7 +164,7 @@ EOF
     echo "deb [signed-by=/usr/share/keyrings/sublimehq-archive-keyring.gpg] https://download.sublimetext.com/ apt/stable/" >/etc/apt/sources.list.d/sublime-text.list
 
     [[ "$DISTRO" == *"ubuntu"* ]] && OS_ID="ubuntu" || OS_ID="debian"
-    curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.noarmor.gpg | tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null || true
+    curl -fsSL "https://pkgs.tailscale.com/stable/debian/bullseye.noarmor.gpg" | tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null || true
     echo "deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/$OS_ID $OS_CODENAME main" >/etc/apt/sources.list.d/tailscale.list
     $UPDATE_CMD || log "[!] Warning: APT update encountered errors."
   fi
@@ -174,8 +175,6 @@ if [[ "$CHOICES" == *"CORE"* ]]; then
   log "[+] Installing core toolstack..."
   if [[ "$PKG_MGR" == "apt" ]]; then
     BRAVE_PKG="brave-browser"
-  elif [[ "$PKG_MGR" == "pacman" ]]; then
-    BRAVE_PKG="brave-origin"
   else
     BRAVE_PKG="brave-origin"
   fi
@@ -185,7 +184,6 @@ if [[ "$CHOICES" == *"CORE"* ]]; then
     [[ "$PKG_MGR" != "apt" ]] && CORE_PKGS+=("spectacle") || CORE_PKGS+=("kde-spectacle")
   fi
 
-  # Loop to prevent pacman from halting the whole install if one app is missing
   for pkg in "${CORE_PKGS[@]}"; do
     $INSTALL_CMD "$pkg" && log "[✔] Installed: $pkg" || log "[✘] Failed to install: $pkg"
   done
@@ -213,7 +211,7 @@ if [[ "$CHOICES" == *"DEBLOAT"* ]]; then
     fi
   done
 
-  if [ ${#VALID_REMOVE[@]} -gt 0 ]; then
+  if [[ ${#VALID_REMOVE[@]} -gt 0 ]]; then
     log "[*] Removing (${#VALID_REMOVE[@]}) confirmed installed packages: ${VALID_REMOVE[*]}"
     $REMOVE_CMD "${VALID_REMOVE[@]}" || log "[!] Warning: Debloat removal encountered errors."
   else
@@ -245,7 +243,7 @@ if [[ "$CHOICES" == *"FLATPAKS"* ]]; then
       if ! flatpak install -y flathub dev.deedles.Trayscale; then
         if command -v go &>/dev/null; then
           su - "$REAL_USER" -c 'go install deedles.dev/trayscale/cmd/trayscale@latest' || true
-          if [ -f "$REAL_HOME/go/bin/trayscale" ]; then
+          if [[ -f "$REAL_HOME/go/bin/trayscale" ]]; then
             cp "$REAL_HOME/go/bin/trayscale" /usr/local/bin/trayscale && chmod +x /usr/local/bin/trayscale
             log "[✔] Trayscale (Go Build) installed"
           fi
@@ -260,14 +258,15 @@ if [[ "$CHOICES" == *"GITHUB"* ]]; then
   log "[+] Deploying GitHub maintenance scripts..."
   if command -v git &>/dev/null; then
     TMP_DIR=$(mktemp -d)
+    trap 'rm -rf "$TMP_DIR"' EXIT
     if git clone --depth 1 "https://github.com/77777kaz77777/linux-environment-automation.git" "$TMP_DIR"; then
 
-      if [ -d "$TMP_DIR/updates" ]; then
+      if [[ -d "$TMP_DIR/updates" ]]; then
         SCRIPTS=()
         for f in "$TMP_DIR/updates"/*; do
-          [ -f "$f" ] && SCRIPTS+=("$(basename "$f")" "")
+          [[ -f "$f" ]] && SCRIPTS+=("$(basename "$f")" "")
         done
-        if [ ${#SCRIPTS[@]} -gt 0 ]; then
+        if [[ ${#SCRIPTS[@]} -gt 0 ]]; then
           SCRIPTS+=("SKIP" "Do not install")
           SEL=$(whiptail --title "Update Script" --menu "Select a script to install:" 15 60 6 "${SCRIPTS[@]}" 3>&1 1>&2 2>&3)
           if [[ -n "$SEL" && "$SEL" != "SKIP" ]]; then
@@ -279,14 +278,14 @@ if [[ "$CHOICES" == *"GITHUB"* ]]; then
 
       ROOT_SCRIPTS=()
       for f in "$TMP_DIR"/*; do
-        [ -f "$f" ] && ROOT_SCRIPTS+=("$(basename "$f")" "")
+        [[ -f "$f" ]] && ROOT_SCRIPTS+=("$(basename "$f")" "")
       done
-      if [ ${#ROOT_SCRIPTS[@]} -gt 0 ]; then
+      if [[ ${#ROOT_SCRIPTS[@]} -gt 0 ]]; then
         ROOT_SCRIPTS+=("ALL" "Install everything" "SKIP" "Do not install")
         SEL=$(whiptail --title "Tool Scripts" --menu "Select script to install:" 15 60 6 "${ROOT_SCRIPTS[@]}" 3>&1 1>&2 2>&3)
         if [[ "$SEL" == "ALL" ]]; then
           for f in "$TMP_DIR"/*; do
-            if [ -f "$f" ]; then
+            if [[ -f "$f" ]]; then
               base=$(basename "$f")
               cp "$f" "/usr/local/bin/${base%.*}" && chmod 755 "/usr/local/bin/${base%.*}"
             fi
@@ -298,7 +297,8 @@ if [[ "$CHOICES" == *"GITHUB"* ]]; then
         fi
       fi
     fi
-    rm -rf "$TMP_DIR" || true
+    rm -rf "$TMP_DIR"
+    trap - EXIT
   fi
 fi
 
@@ -307,7 +307,7 @@ if [[ "$CHOICES" == *"TERM"* ]]; then
   log "[+] Configuring Shell Aliases, Konsole, and Alacritty Themes..."
 
   BASHRC_PATH="$REAL_HOME/.bashrc"
-  [ -f "$BASHRC_PATH" ] && cp "$BASHRC_PATH" "$BASHRC_PATH.bak" && chown "$REAL_USER" "$BASHRC_PATH.bak" || true
+  [[ -f "$BASHRC_PATH" ]] && cp "$BASHRC_PATH" "$BASHRC_PATH.bak" && chown "$REAL_USER:$REAL_USER" "$BASHRC_PATH.bak" || true
 
   cat <<'EOF' >"$BASHRC_PATH"
 # .bashrc
@@ -335,7 +335,7 @@ alias g='ssh -T git@github.com'
 alias s='sudo shutdown now'
 export PS1="\u@\h:\w\$ "
 EOF
-  chown "$REAL_USER" "$BASHRC_PATH" || true
+  chown "$REAL_USER:$REAL_USER" "$BASHRC_PATH" || true
 
   KONSOLE_SH="/tmp/setup_konsole.sh"
   cat <<'EOF' >"$KONSOLE_SH"
@@ -409,27 +409,26 @@ if [[ "$CHOICES" == *"DESKTOP"* ]]; then
   if [[ "$DE" == "kde" ]]; then
     log "[+] Configuring KDE Plasma Wallpaper..."
 
-    # Fetch wallpapers from repository
     WALL_TMP=$(mktemp -d)
+    trap 'rm -rf "$WALL_TMP"' EXIT
     log "[+] Cloning wallpaper repository..."
     if git clone --depth 1 "https://github.com/77777kaz77777/wallpapers.git" "$WALL_TMP"; then
       WALL_FILES=()
       while IFS= read -r f; do
-        [ -n "$f" ] && WALL_FILES+=("$(basename "$f")" "")
+        [[ -n "$f" ]] && WALL_FILES+=("$(basename "$f")" "")
       done < <(find "$WALL_TMP" -maxdepth 2 -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \))
 
-      if [ ${#WALL_FILES[@]} -gt 0 ]; then
+      if [[ ${#WALL_FILES[@]} -gt 0 ]]; then
         SELECTED_WALL=$(whiptail --title "Wallpaper Selection" --menu "Select a wallpaper to apply:" 18 70 8 "${WALL_FILES[@]}" 3>&1 1>&2 2>&3)
 
-        if [ -n "$SELECTED_WALL" ]; then
+        if [[ -n "$SELECTED_WALL" ]]; then
           TARGET_WALL_PATH="$REAL_HOME/Pictures/Wallpapers/$SELECTED_WALL"
           mkdir -p "$REAL_HOME/Pictures/Wallpapers"
 
-          # Locate and copy chosen image safely
           FOUND_FILE=$(find "$WALL_TMP" -name "$SELECTED_WALL" -print -quit)
-          if [ -n "$FOUND_FILE" ]; then
+          if [[ -n "$FOUND_FILE" ]]; then
             cp "$FOUND_FILE" "$TARGET_WALL_PATH"
-            chown -R "$REAL_USER:" "$REAL_HOME/Pictures/Wallpapers"
+            chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/Pictures/Wallpapers"
 
             USER_UID=$(id -u "$REAL_USER")
             DBUS_ENV="export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$USER_UID/bus;"
@@ -441,12 +440,13 @@ if [[ "$CHOICES" == *"DESKTOP"* ]]; then
         log "[-] No wallpaper images found in repository."
       fi
     fi
-    rm -rf "$WALL_TMP" || true
+    rm -rf "$WALL_TMP"
+    trap - EXIT
   else
     log "[!] Desktop setup skipped: System is not running KDE Plasma."
   fi
 fi
 
 log "\n--- Installation Sequence Complete ---"
-log "Log saved to $(realpath $LOG_FILE)"
+log "Log saved to $(realpath "$LOG_FILE")"
 echo -e "\nSetup finished. Please run 'source ~/.bashrc' or open a new terminal to apply alias changes."

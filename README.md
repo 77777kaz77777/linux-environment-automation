@@ -72,4 +72,5 @@ The repository also demonstrates practical implementations of infrastructure man
 | `setup.sh` | Automated Linux workstation bootstrap, toolstack installer, repository deployment, and desktop setup. |
 | `system-health-report.sh` | Diagnostic script that generates a quick report on system health, disk usage, and failed Systemd services. |
 | `toggle-tailscale.sh` | Script to easily toggle Tailscale connections, including a prompt for selecting an exit node. |
+| `virt-remover.sh` | Interactive script to uninstall virt-manager or completely purge the KVM/libvirt virtualization stack. |
 <!-- END_SECTION:tree -->

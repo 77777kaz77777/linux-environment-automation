@@ -174,7 +174,7 @@ fi
 if [[ "$CHOICES" == *"CORE"* ]]; then
   log "[+] Installing core toolstack..."
   if [[ "$PKG_MGR" == "apt" ]]; then
-    BRAVE_PKG="brave-browser"
+    BRAVE_PKG="brave-origin"
   else
     BRAVE_PKG="brave-origin"
   fi

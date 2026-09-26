@@ -1,6 +1,6 @@
 #!/bin/bash
 #  Automated Linux workstation bootstrap, toolstack installer, repository deployment, and desktop setup.
-
+#  NOTE: This script is intended exclusively for Arch Linux and Red Hat-based systems (Fedora, RHEL, CentOS, AlmaLinux, Rocky Linux).
 set -o pipefail
 
 LOG_FILE="workstation_install.log"
@@ -38,8 +38,6 @@ if pgrep -i plasmashell >/dev/null || pgrep -i kwin_wayland >/dev/null || pgrep 
   DE="kde"
 elif pgrep -i gnome-shell >/dev/null; then
   DE="gnome"
-elif pgrep -i cinnamon >/dev/null; then
-  DE="cinnamon"
 elif pgrep -i cosmic-comp >/dev/null || pgrep -i cosmic-session >/dev/null; then
   DE="cosmic"
 else
@@ -48,8 +46,6 @@ else
     DE="kde"
   elif [[ "$COMBINED" == *"gnome"* ]]; then
     DE="gnome"
-  elif [[ "$COMBINED" == *"cinnamon"* ]]; then
-    DE="cinnamon"
   elif [[ "$COMBINED" == *"cosmic"* ]]; then
     DE="cosmic"
   fi
@@ -66,21 +62,11 @@ elif command -v dnf &>/dev/null; then
   INSTALL_CMD="dnf install -y"
   REMOVE_CMD="dnf remove -y"
   UPDATE_CMD="dnf update -y"
-elif command -v apt-get &>/dev/null; then
-  PKG_MGR="apt"
-  INSTALL_CMD="DEBIAN_FRONTEND=noninteractive apt-get install -y"
-  REMOVE_CMD="DEBIAN_FRONTEND=noninteractive apt-get remove -y"
-  UPDATE_CMD="apt-get update -y"
 elif command -v pacman &>/dev/null; then
   PKG_MGR="pacman"
   INSTALL_CMD="pacman -S --needed --noconfirm"
   REMOVE_CMD="pacman -Rns --noconfirm"
   UPDATE_CMD="pacman -Sy"
-elif command -v zypper &>/dev/null; then
-  PKG_MGR="zypper"
-  INSTALL_CMD="zypper in -y"
-  REMOVE_CMD="zypper rm -y"
-  UPDATE_CMD="zypper ref"
 else
   log "[✘] Error: Unsupported package manager."
   exit 1
@@ -154,34 +140,17 @@ EOF
       [[ ! -f /etc/yum.repos.d/tailscale.repo ]] && dnf config-manager --add-repo "$TS_REPO" || true
       log "[✔] Configured DNF4 repositories."
     fi
-
-  elif [[ "$PKG_MGR" == "apt" ]]; then
-    log "Configuring APT repositories..."
-    curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg || true
-    echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" >/etc/apt/sources.list.d/brave-browser-release.list
-
-    wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | gpg --dearmor -o /usr/share/keyrings/sublimehq-archive-keyring.gpg || true
-    echo "deb [signed-by=/usr/share/keyrings/sublimehq-archive-keyring.gpg] https://download.sublimetext.com/ apt/stable/" >/etc/apt/sources.list.d/sublime-text.list
-
-    [[ "$DISTRO" == *"ubuntu"* ]] && OS_ID="ubuntu" || OS_ID="debian"
-    curl -fsSL "https://pkgs.tailscale.com/stable/debian/bullseye.noarmor.gpg" | tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null || true
-    echo "deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/$OS_ID $OS_CODENAME main" >/etc/apt/sources.list.d/tailscale.list
-    $UPDATE_CMD || log "[!] Warning: APT update encountered errors."
   fi
 fi
 
 # --- 2. Core Toolstack ---
 if [[ "$CHOICES" == *"CORE"* ]]; then
   log "[+] Installing core toolstack..."
-  if [[ "$PKG_MGR" == "apt" ]]; then
-    BRAVE_PKG="brave-origin"
-  else
-    BRAVE_PKG="brave-origin"
-  fi
+  BRAVE_PKG="brave-origin"
 
   CORE_PKGS=("$BRAVE_PKG" "firefox" "sublime-text" "podman" "virt-manager" "btop" "vlc" "nmap" "fastfetch" "tailscale" "alacritty" "dolphin")
   if [[ "$DE" == "kde" ]]; then
-    [[ "$PKG_MGR" != "apt" ]] && CORE_PKGS+=("spectacle") || CORE_PKGS+=("kde-spectacle")
+    CORE_PKGS+=("spectacle")
   fi
 
   for pkg in "${CORE_PKGS[@]}"; do
@@ -197,14 +166,10 @@ if [[ "$CHOICES" == *"DEBLOAT"* ]]; then
   [[ "$DE" == "kde" ]] && BLOAT+=("akonadi" "kmail" "kontact" "korganizer" "kaddressbook" "akregator" "pim-data-exporter" "kfind" "kleopatra" "kmouth" "ktnef" "dragon" "dragonplayer" "elisa-player" "kamoso" "kmahjongg" "kmines" "kpat" "krdc" "krfb" "fedora-media-writer" "kdepim-addons" "kmail-account-wizard" "neochat" "kwrite" "pim-sieve-editor" "kdepim-runtime")
   [[ "$DE" == "gnome" ]] && BLOAT+=("gnome-tour" "epiphany-browser" "gnome-weather" "gnome-clocks" "gnome-maps" "totem" "cheese")
   [[ "$DE" == "cosmic" ]] && BLOAT+=("totem" "evince" "gnome-calendar" "cheese")
-  [[ "$DE" == "cinnamon" ]] && BLOAT+=("rhythmbox" "totem" "hexchat")
-  [[ "$PKG_MGR" == "apt" ]] && BLOAT+=("snapd" "gnome-software-plugin-snap")
 
   VALID_REMOVE=()
   for pkg in "${BLOAT[@]}"; do
-    if [[ "$PKG_MGR" =~ ^(dnf4|dnf5|zypper)$ ]] && rpm -q "$pkg" &>/dev/null; then
-      VALID_REMOVE+=("$pkg")
-    elif [[ "$PKG_MGR" == "apt" ]] && dpkg -l "$pkg" &>/dev/null; then
+    if [[ "$PKG_MGR" =~ ^(dnf4|dnf5)$ ]] && rpm -q "$pkg" &>/dev/null; then
       VALID_REMOVE+=("$pkg")
     elif [[ "$PKG_MGR" == "pacman" ]] && pacman -Qq "$pkg" &>/dev/null; then
       VALID_REMOVE+=("$pkg")
@@ -220,7 +185,6 @@ if [[ "$CHOICES" == *"DEBLOAT"* ]]; then
 
   [[ "$PKG_MGR" == "dnf5" ]] && (dnf5 autoremove -y && dnf5 clean all || true)
   [[ "$PKG_MGR" == "dnf4" ]] && (dnf autoremove -y && dnf clean all || true)
-  [[ "$PKG_MGR" == "apt" ]] && (apt-get autoremove -y && apt-get clean || true)
   [[ "$PKG_MGR" == "pacman" ]] && (pacman -Sc --noconfirm || true)
 fi
 

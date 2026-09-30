@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Diagnostic script that generates a quick report on system health, disk usage, and failed Systemd services.
+# Diagnostic script that generates a quick report on system health, disk usage, and failed services.
 # Enforce strict error handling
 set -euo pipefail
 
@@ -37,9 +37,14 @@ warning_found=false
 while read -r usage mount; do
   # Remove the % sign for integer comparison
   usage_val=${usage%\%}
-  if [ "$usage_val" -gt 85 ]; then
-    echo "    ⚠️  WARNING: Partition '$mount' is at ${usage} capacity!"
-    warning_found=true
+  
+  # Ensure the parsed value is a number before attempting an integer comparison.
+  # This prevents syntax errors if a specific distro's df output misaligns the columns.
+  if [[ "$usage_val" =~ ^[0-9]+$ ]]; then
+    if [ "$usage_val" -gt 85 ]; then
+      echo "    ⚠️  WARNING: Partition '$mount' is at ${usage} capacity!"
+      warning_found=true
+    fi
   fi
 done < <(df -h -T -x tmpfs -x devtmpfs -x squashfs -x efivarfs | awk 'NR>1 {print $6, $7}')
 
@@ -48,19 +53,41 @@ if [ "$warning_found" = false ]; then
 fi
 echo ""
 
-# 5. Check for Failed Systemd Services
-echo "[+] Failed Systemd Services:"
-# --failed limits output to failed units
-# --no-legend suppresses header and footer lines
-# --plain suppresses the circle indicators for easier text parsing
-failed_services=$(systemctl --failed --no-legend --plain)
+# 5. Check for Failed Services (Distro-Agnostic Init System Detection)
+echo "[+] Failed Services:"
 
-if [ -z "$failed_services" ]; then
-  echo "    ✅ No failed systemd services. System is running cleanly."
+# Check for Systemd (Ubuntu, Debian, Fedora, Arch, openSUSE)
+if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
+  failed_services=$(systemctl --failed --no-legend --plain)
+  if [ -z "$failed_services" ]; then
+    echo "    ✅ No failed systemd services. System is running cleanly."
+  else
+    echo "    ❌ WARNING: The following systemd services have failed:"
+    echo "$failed_services"
+  fi
+
+# Check for OpenRC (Alpine Linux, Gentoo, Artix)
+elif command -v rc-status >/dev/null 2>&1; then
+  # rc-status --crashed specifically outputs services that have crashed
+  failed_services=$(rc-status --crashed --nocolor | grep -v 'crashed')
+  if [ -z "$failed_services" ] || [[ "$failed_services" == *"(empty)"* ]]; then
+    echo "    ✅ No crashed OpenRC services. System is running cleanly."
+  else
+    echo "    ❌ WARNING: The following OpenRC services have crashed:"
+    rc-status --crashed --nocolor
+  fi
+
+# Check for Runit (Void Linux, Artix Runit variant)
+elif command -v sv >/dev/null 2>&1 && [ -d /var/service ]; then
+  echo "    ℹ️  System uses Runit. Showing current service states (check for unexpected 'down' states):"
+  sv status /var/service/*
+
+# Fallback for SysVinit or other unhandled systems (Devuan, Slackware, etc.)
 else
-  echo "    ❌ WARNING: The following services have failed:"
-  echo "$failed_services"
+  echo "    ⚠️  Init system not recognized as Systemd, OpenRC, or Runit."
+  echo "    ℹ️  Skipping automated failed service detection."
 fi
+
 echo ""
 echo "=================================================="
 echo "                 REPORT COMPLETE                  "

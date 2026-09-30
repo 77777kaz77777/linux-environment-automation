@@ -70,7 +70,7 @@ The repository also demonstrates practical implementations of infrastructure man
 | `organize_scripts.py` | This script scans a local directory of bash scripts, uses a local LLM via LM Studio to analyze and categorize each one, and compiles the metadata into a JSON manifest file. |
 | `pull-script.sh` | Interactively pulls and downloads an individual shell script from  a specified folder within the remote GitHub repository, then makes it executable. |
 | `setup.sh` | Automated Linux workstation bootstrap, toolstack installer, repository deployment, and desktop setup. |
-| `system-health-report.sh` | Diagnostic script that generates a quick report on system health, disk usage, and failed Systemd services. |
+| `system-health-report.sh` | Diagnostic script that generates a quick report on system health, disk usage, and failed services. |
 | `toggle-tailscale.sh` | Script to easily toggle Tailscale connections, including a prompt for selecting an exit node. |
 | `virt-remover.sh` | Interactive script to uninstall virt-manager or completely purge the KVM/libvirt virtualization stack. |
 <!-- END_SECTION:tree -->

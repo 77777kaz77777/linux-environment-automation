@@ -27,8 +27,8 @@ elif [ -r /proc/uptime ] && [ -r /proc/loadavg ]; then
   # Fallback for environments without the 'uptime' binary
   up_seconds=$(cut -d. -f1 /proc/uptime)
   up_days=$((up_seconds / 86400))
-  up_hours=$(( (up_seconds % 86400) / 3600 ))
-  up_mins=$(( (up_seconds % 3600) / 60 ))
+  up_hours=$(((up_seconds % 86400) / 3600))
+  up_mins=$(((up_seconds % 3600) / 60))
   load_avg=$(cat /proc/loadavg | awk '{print $1", "$2", "$3}')
   echo "up ${up_days} days, ${up_hours}:${up_mins},  load average: ${load_avg}"
 else
@@ -53,7 +53,7 @@ echo "[+] Real Disk Space Usage:"
 if command -v df >/dev/null 2>&1; then
   df -h -T -x tmpfs -x devtmpfs -x squashfs -x efivarfs || true
   echo ""
-  
+
   # 4. Check for Disk Space Warnings (>85% capacity)
   echo "[+] Disk Capacity Warnings:"
   warning_found=false
@@ -61,7 +61,7 @@ if command -v df >/dev/null 2>&1; then
   while read -r usage mount; do
     # Remove the % sign for integer comparison
     usage_val=${usage%\%}
-    
+
     # Ensure the parsed value is a number before attempting an integer comparison.
     if [[ "$usage_val" =~ ^[0-9]+$ ]]; then
       if [ "$usage_val" -gt 85 ]; then

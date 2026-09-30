@@ -37,7 +37,7 @@ warning_found=false
 while read -r usage mount; do
   # Remove the % sign for integer comparison
   usage_val=${usage%\%}
-  
+
   # Ensure the parsed value is a number before attempting an integer comparison.
   # This prevents syntax errors if a specific distro's df output misaligns the columns.
   if [[ "$usage_val" =~ ^[0-9]+$ ]]; then

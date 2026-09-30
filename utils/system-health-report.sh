@@ -3,53 +3,79 @@
 # Enforce strict error handling
 set -euo pipefail
 
+# Safely resolve hostname for minimal environments
+if command -v hostname >/dev/null 2>&1; then
+  CURRENT_HOSTNAME=$(hostname)
+elif [ -r /etc/hostname ]; then
+  CURRENT_HOSTNAME=$(cat /etc/hostname)
+else
+  CURRENT_HOSTNAME="Unknown"
+fi
+
 echo "=================================================="
 echo "           SYSTEM HEALTH REPORT                   "
 echo "           Date: $(date "+%Y-%m-%d %H:%M:%S")     "
-echo "           Hostname: $(hostname)                  "
+echo "           Hostname: ${CURRENT_HOSTNAME}          "
 echo "=================================================="
 echo ""
 
 # 1. Check Uptime and CPU Load Average
-# The load averages represent 1, 5, and 15 minute intervals.
 echo "[+] Uptime & CPU Load Average:"
-uptime
+if command -v uptime >/dev/null 2>&1; then
+  uptime
+elif [ -r /proc/uptime ] && [ -r /proc/loadavg ]; then
+  # Fallback for environments without the 'uptime' binary
+  up_seconds=$(cut -d. -f1 /proc/uptime)
+  up_days=$((up_seconds / 86400))
+  up_hours=$(( (up_seconds % 86400) / 3600 ))
+  up_mins=$(( (up_seconds % 3600) / 60 ))
+  load_avg=$(cat /proc/loadavg | awk '{print $1", "$2", "$3}')
+  echo "up ${up_days} days, ${up_hours}:${up_mins},  load average: ${load_avg}"
+else
+  echo "    ⚠️ 'uptime' command not found and /proc metrics are unavailable."
+fi
 echo ""
 
 # 2. Check Memory & Swap Usage
-# -h provides human-readable output (MB/GB).
 echo "[+] Memory Usage:"
-free -h
+if command -v free >/dev/null 2>&1; then
+  free -h
+elif [ -r /proc/meminfo ]; then
+  # Fallback for environments without the 'free' binary (missing procps)
+  grep -E 'MemTotal|MemFree|MemAvailable|SwapTotal|SwapFree' /proc/meminfo
+else
+  echo "    ⚠️ 'free' command not found and /proc/meminfo is unavailable."
+fi
 echo ""
 
 # 3. Check Disk Space
-# -h: Human readable
-# -T: Print file system type
-# -x: Exclude temporary and loop/snap/flatpak filesystems for a cleaner output
 echo "[+] Real Disk Space Usage:"
-df -h -T -x tmpfs -x devtmpfs -x squashfs -x efivarfs
-echo ""
-
-# 4. Check for Disk Space Warnings (>85% capacity)
-echo "[+] Disk Capacity Warnings:"
-warning_found=false
-# Parse df output, grab usage percentage and mount point, skipping the header line
-while read -r usage mount; do
-  # Remove the % sign for integer comparison
-  usage_val=${usage%\%}
-
-  # Ensure the parsed value is a number before attempting an integer comparison.
-  # This prevents syntax errors if a specific distro's df output misaligns the columns.
-  if [[ "$usage_val" =~ ^[0-9]+$ ]]; then
-    if [ "$usage_val" -gt 85 ]; then
-      echo "    ⚠️  WARNING: Partition '$mount' is at ${usage} capacity!"
-      warning_found=true
+if command -v df >/dev/null 2>&1; then
+  df -h -T -x tmpfs -x devtmpfs -x squashfs -x efivarfs || true
+  echo ""
+  
+  # 4. Check for Disk Space Warnings (>85% capacity)
+  echo "[+] Disk Capacity Warnings:"
+  warning_found=false
+  # Parse df output, grab usage percentage and mount point, skipping the header line
+  while read -r usage mount; do
+    # Remove the % sign for integer comparison
+    usage_val=${usage%\%}
+    
+    # Ensure the parsed value is a number before attempting an integer comparison.
+    if [[ "$usage_val" =~ ^[0-9]+$ ]]; then
+      if [ "$usage_val" -gt 85 ]; then
+        echo "    ⚠️  WARNING: Partition '$mount' is at ${usage} capacity!"
+        warning_found=true
+      fi
     fi
-  fi
-done < <(df -h -T -x tmpfs -x devtmpfs -x squashfs -x efivarfs | awk 'NR>1 {print $6, $7}')
+  done < <(df -h -T -x tmpfs -x devtmpfs -x squashfs -x efivarfs 2>/dev/null | awk 'NR>1 {print $6, $7}')
 
-if [ "$warning_found" = false ]; then
-  echo "    ✅ No partitions are above 85% capacity."
+  if [ "$warning_found" = false ]; then
+    echo "    ✅ No partitions are above 85% capacity."
+  fi
+else
+  echo "    ⚠️ 'df' command not found. Skipping disk checks."
 fi
 echo ""
 
@@ -68,7 +94,6 @@ if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
 
 # Check for OpenRC (Alpine Linux, Gentoo, Artix)
 elif command -v rc-status >/dev/null 2>&1; then
-  # rc-status --crashed specifically outputs services that have crashed
   failed_services=$(rc-status --crashed --nocolor | grep -v 'crashed')
   if [ -z "$failed_services" ] || [[ "$failed_services" == *"(empty)"* ]]; then
     echo "    ✅ No crashed OpenRC services. System is running cleanly."
@@ -82,7 +107,7 @@ elif command -v sv >/dev/null 2>&1 && [ -d /var/service ]; then
   echo "    ℹ️  System uses Runit. Showing current service states (check for unexpected 'down' states):"
   sv status /var/service/*
 
-# Fallback for SysVinit or other unhandled systems (Devuan, Slackware, etc.)
+# Fallback for SysVinit or environments with no init daemon (e.g., Docker containers)
 else
   echo "    ⚠️  Init system not recognized as Systemd, OpenRC, or Runit."
   echo "    ℹ️  Skipping automated failed service detection."

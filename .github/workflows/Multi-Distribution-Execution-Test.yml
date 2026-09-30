@@ -36,6 +36,8 @@ jobs:
               - "./security/osi-security-overview.sh"
               - "./configs/setup-bashrc.sh"
               - "./configs/setup-alacritty.sh"
+              - "./utils/system-health-report.sh"
+              
 
           - name: RedHat (Rocky Linux)
             image: rockylinux/rockylinux:10
@@ -50,6 +52,7 @@ jobs:
               - "./security/update-clamav-signatures.sh"
               - "./security/osi-security-overview.sh"
               - "./configs/setup-bashrc.sh"
+              - "./utils/system-health-report.sh"
 
           - name: Ubuntu
             image: ubuntu:26.04
@@ -64,6 +67,7 @@ jobs:
               - "./security/update-clamav-signatures.sh"
               - "./security/osi-security-overview.sh"
               - "./configs/setup-bashrc.sh"
+              - "./utils/system-health-report.sh"
 
           - name: Debian
             image: debian:latest
@@ -76,6 +80,7 @@ jobs:
               - "./security/update-clamav-signatures.sh"
               - "./security/osi-security-overview.sh"
               - "./configs/setup-bashrc.sh"
+              - "./utils/system-health-report.sh"
 
           - name: Arch
             image: archlinux:latest
@@ -88,6 +93,7 @@ jobs:
               - "./security/update-clamav-signatures.sh"
               - "./security/osi-security-overview.sh"
               - "./configs/setup-bashrc.sh"
+              - "./utils/system-health-report.sh"
 
     container:
       image: ${{ matrix.image }}

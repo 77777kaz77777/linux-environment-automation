@@ -1,0 +1,36 @@
+name: Auto-Fix Markdown Formatting
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  markdownlint-fix:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      
+      - name: Run markdownlint auto-fix
+        run: npx markdownlint-cli2 --fix "**/*.md" || true
+      
+      - name: Sync with remote branch
+        run: git pull --rebase --autostash origin main
+      
+      - name: Commit and Push changes
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "style: auto-fix markdown formatting spacing"

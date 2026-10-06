@@ -148,7 +148,7 @@ if [[ "$CHOICES" == *"CORE"* ]]; then
   log "[+] Installing core toolstack..."
   BRAVE_PKG="brave-origin"
 
-  CORE_PKGS=("$BRAVE_PKG" "firefox" "sublime-text" "podman" "virt-manager" "btop" "vlc" "nmap" "fastfetch" "tailscale" "alacritty" "dolphin")
+  CORE_PKGS=("$BRAVE_PKG" "firefox" "sublime-text" "podman" "btop" "vlc" "nmap" "fastfetch" "tailscale" "alacritty" "dolphin")
   if [[ "$DE" == "kde" ]]; then
     CORE_PKGS+=("spectacle")
   fi

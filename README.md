@@ -12,7 +12,7 @@ The repository also demonstrates practical implementations of infrastructure man
 ### 📁 configs/ (Terminal & CLI tool dotfiles)
 
 | File | Description |
-| --- | --- |
+|---|---|
 | `alacritty.toml` | Configuration file for the Alacritty terminal emulator. |
 | `dnf.conf` | Optimized Fedora DNF package manager config tweaked for max download speeds, parallel downloads, and clean dependency management. |
 | `fastfetch-laptop1-config.jsonc` | Fastfetch system info configuration for the primary laptop (ASUS ROG Zephyrus G15). |
@@ -20,17 +20,19 @@ The repository also demonstrates practical implementations of infrastructure man
 | `setup-alacritty.sh` | Automates Alacritty installation, font setup, and configuration for Fedora |
 | `setup-bashrc.sh` | safely installs the custom .bashrc configuration and aliases. |
 
+
 ### 📁 desktop-tweaks/ (UI customization & desktop scripts)
 
 | File | Description |
-| --- | --- |
+|---|---|
 | `konsole-white-on-black.sh` | Script to force the Konsole terminal background to solid black (#000000) with pure white text. |
 | `set-login-wallpaper.sh` | Script to change and apply the display manager wallpaper. |
+
 
 ### 📁 security/ (Antivirus & system defense utilities)
 
 | File | Description |
-| --- | --- |
+|---|---|
 | `clamav-nightly-scan.sh` | ClamAV scan script designed to run nightly. |
 | `clamav-scan.service` | Systemd service unit responsible for executing the nightly ClamAV scan. |
 | `clamav-scan.timer` | Systemd timer unit that schedules the ClamAV scans to run at 2:00 AM |
@@ -42,10 +44,11 @@ The repository also demonstrates practical implementations of infrastructure man
 | `setup-clamav-fedora.sh` | Automated script to install and set up ClamAV on Fedora. |
 | `update-clamav-signatures.sh` | Script to manually trigger Freshclam and update antivirus signatures. |
 
+
 ### 📁 updates/ (Distro maintenance & update scripts)
 
 | File | Description |
-| --- | --- |
+|---|---|
 | `clean-mint.sh` | Cleanup routine for clearing out old APT packages and caches on Linux Mint. |
 | `debloat-fedora-kde.sh` | Script to remove Akonadi/PIM bloat, unused media tools, office suites, and clear caches on Fedora KDE. |
 | `system-cleanup.sh` | Safe cleanup script for wiping temporary files and old system logs |
@@ -55,10 +58,11 @@ The repository also demonstrates practical implementations of infrastructure man
 | `update-mint.sh` | Automated system update script for Debian/Mint handling APT, Flatpaks, and cleanups. |
 | `update-ubuntu.sh` | Automated system update and maintenance script tailored for Ubuntu and Debian. |
 
+
 ### 📁 utils/ (General standalone helper scripts)
 
 | File | Description |
-| --- | --- |
+|---|---|
 | `apply_organization.py` | This script reads the generated JSON manifest, moves and renames the script files into sanitized category subdirectories, and automatically compiles a ⁠README.md⁠ index table documenting them all. |
 | `create-script-template.sh` | Interactive generator that scaffolds a new, executable Bash script with standard headers and strict error handling flags. |
 | `fedora_rog_setup.sh` | Optimization and Setup Script for ASUS ROG Zephyrus G15 on Fedora 44 KDE |

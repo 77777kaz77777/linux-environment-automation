@@ -1,0 +1,24 @@
+--- 
+# Inherit all standard YAML linting rules
+extends: default
+
+rules:
+  # Disable the requirement for files to start with "---"
+  # (GitHub Actions files typically do not use this)
+  document-start: disable
+  
+  # Allow lines longer than 80 characters
+  # (GitHub Actions run commands and URLs are frequently longer)
+  line-length: disable
+  
+  # Allow the use of `on:` as a key without wrapping it in quotes `"on":`
+  truthy:
+    check-keys: false
+    
+  # Disable failing the build just because of invisible trailing spaces
+  trailing-spaces: disable
+
+  # Ensure consistent spacing, but don't strictly enforce sequence indentation
+  indentation:
+    spaces: 2
+    indent-sequences: consistent

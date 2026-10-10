@@ -1,6 +1,6 @@
 ---
 name: Linter Bot
-"on":
+on:
   push:
     branches: ["main"]
   pull_request:

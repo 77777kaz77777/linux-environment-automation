@@ -38,7 +38,7 @@ The repository also demonstrates practical implementations of infrastructure man
 | <a href="security/clamav-scan.timer"><code>clamav-scan.timer</code></a> | Systemd timer unit that schedules the ClamAV scans to run at 2:00 AM |
 | <a href="security/fedora-kde-hardening.sh"><code>fedora-kde-hardening.sh</code></a> | Automated security hardening, kernel parameter tuning, and session protection script designed for Fedora KDE. |
 | <a href="security/harden-cachyos.sh"><code>harden-cachyos.sh</code></a> | Hardening script to apply firewall, AppArmor, and sysctl security tweaks on CachyOS. |
-| <a href="security/linux-mint-hardening-script.sh"><code>linux-mint-hardening-script.sh</code></a> | A bash script that hardens Linux Mint by disabling unnecessary services, hardening remaining risky services, applying sysctl kernel/network hardening, setting default file permissions, and reloading systemd. |
+| <a href="security/linux-mint-hardening-script.sh"><code>linux-mint-hardening-script.sh</code></a> | Hardening script to disable unnecessary services, apply sysctl network/kernel protections, and enforce strict file permissions on Linux Mint. |
 | <a href="security/osi-security-overview.sh"><code>osi-security-overview.sh</code></a> | Custom reference utility that provides a breakdown of security at each OSI layer. |
 | <a href="security/port-scanner.py"><code>port-scanner.py</code></a> | Educational multi-threaded TCP socket scanner (College Project) |
 | <a href="security/run-clamav-scan.sh"><code>run-clamav-scan.sh</code></a> | multithreaded ClamAV daemon scan for /home and system binaries. |

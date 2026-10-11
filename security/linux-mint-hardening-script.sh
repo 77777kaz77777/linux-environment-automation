@@ -8,14 +8,14 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-log_info()    { echo -e "${GREEN}[+]${NC} $1"; }
-log_warn()    { echo -e "${YELLOW}[!]${NC} $1"; }
-log_err()     { echo -e "${RED}[X]${NC} $1"; }
+log_info() { echo -e "${GREEN}[+]${NC} $1"; }
+log_warn() { echo -e "${YELLOW}[!]${NC} $1"; }
+log_err() { echo -e "${RED}[X]${NC} $1"; }
 
 # --- Root Check ---
 if [[ ${EUID} -ne 0 ]]; then
-    log_err "This script must be executed as root. Exiting."
-    exit 1
+  log_err "This script must be executed as root. Exiting."
+  exit 1
 fi
 
 echo "=========================================="
@@ -28,22 +28,22 @@ echo "=========================================="
 log_info "Disabling and masking unnecessary network/desktop services..."
 
 DISABLE_SERVICES=(
-    avahi-daemon.service
-    blueman-mechanism.service
-    bluetooth.service
-    cups.service
-    rpcbind.service
+  avahi-daemon.service
+  blueman-mechanism.service
+  bluetooth.service
+  cups.service
+  rpcbind.service
 )
 
 for service in "${DISABLE_SERVICES[@]}"; do
-    if systemctl is-active --quiet "${service}" || systemctl is-enabled --quiet "${service}"; then
-        log_info "Stopping and masking ${service}..."
-        systemctl stop "${service}" 2>/dev/null || true
-        systemctl disable "${service}" 2>/dev/null || true
-        systemctl mask "${service}" 2>/dev/null || true
-    else
-        log_warn "${service} is already inactive/disabled or not installed."
-    fi
+  if systemctl is-active --quiet "${service}" || systemctl is-enabled --quiet "${service}"; then
+    log_info "Stopping and masking ${service}..."
+    systemctl stop "${service}" 2>/dev/null || true
+    systemctl disable "${service}" 2>/dev/null || true
+    systemctl mask "${service}" 2>/dev/null || true
+  else
+    log_warn "${service} is already inactive/disabled or not installed."
+  fi
 done
 
 # ------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ log_info "Applying kernel and network hardening parameters..."
 
 SYSCTL_CONF="/etc/sysctl.d/99-lynis-hardening.conf"
 
-cat <<'EOF' > "${SYSCTL_CONF}"
+cat <<'EOF' >"${SYSCTL_CONF}"
 # ----------------------------------------------------
 # Network Hardening (IP Routing, Redirects, Spoofing)
 # ----------------------------------------------------
@@ -120,31 +120,31 @@ log_info "Setting restrictive umask (027)..."
 
 # Apply to /etc/login.defs for login shells
 if grep -E -q "^UMASK" /etc/login.defs; then
-    sed -i 's/^UMASK.*/UMASK           027/' /etc/login.defs
+  sed -i 's/^UMASK.*/UMASK           027/' /etc/login.defs
 else
-    echo "UMASK           027" >> /etc/login.defs
+  echo "UMASK           027" >>/etc/login.defs
 fi
 
 # Apply to common profile scripts
 PROFILE_FILES=(
-    /etc/profile
-    /etc/bash.bashrc
+  /etc/profile
+  /etc/bash.bashrc
 )
 
 for file in "${PROFILE_FILES[@]}"; do
-    if [[ -f "${file}" ]]; then
-        if grep -q "umask" "${file}"; then
-            sed -i -E 's/umask [0-9]{3,4}/umask 027/g' "${file}"
-        else
-            echo "umask 027" >> "${file}"
-        fi
+  if [[ -f "${file}" ]]; then
+    if grep -q "umask" "${file}"; then
+      sed -i -E 's/umask [0-9]{3,4}/umask 027/g' "${file}"
+    else
+      echo "umask 027" >>"${file}"
     fi
+  fi
 done
 
 # Ensure umask module configuration in PAM (if pam_umask is available)
 PAM_COMMON_SESSION="/etc/pam.d/common-session"
 if [[ -f "${PAM_COMMON_SESSION}" ]] && ! grep -q "pam_umask.so" "${PAM_COMMON_SESSION}"; then
-    echo "session optional pam_umask.so umask=027" >> "${PAM_COMMON_SESSION}"
+  echo "session optional pam_umask.so umask=027" >>"${PAM_COMMON_SESSION}"
 fi
 
 # ------------------------------------------------------------------------------

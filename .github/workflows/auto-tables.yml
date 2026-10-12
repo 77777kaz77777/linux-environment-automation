@@ -29,17 +29,14 @@ jobs:
           import os, re
           
           FOLDER_DESCS = {
-              "ansible": "Ansible Automation Guides",
-              "containers": "Docker, Podman, and LXC Guides",
-              "fedora": "Fedora Linux Specific Documentation",
-              "linux-general": "General Linux Reference",
-              "package-management": "Package Managers & App Formats",
-              "storage-and-filesystems": "BTRFS, ZFS, RAID & Storage Utilities",
-              "desktop-environments": "KDE Plasma, Terminals & Desktop Tools",
-              "hardware-and-firmware": "Firmware Updates & Hardware Quirks",
-              "networking-and-security": "Networking & Security Configurations",
-              "virtualization": "Hypervisor & VM Runbooks",
-              "windows-and-macos": "Windows & macOS References"
+              "configs": "Terminal & CLI tool dotfiles",
+              "configs/setup-scripts": "Dotfile Deployment Scripts",
+              "desktop-tweaks": "UI customization & desktop scripts",
+              "provisioning": "Workstation Bootstrap & Setup",
+              "repo-management": "LLM Metadata & Repo Organization",
+              "security": "Antivirus & system defense utilities",
+              "updates": "Distro maintenance & update scripts",
+              "utils": "General standalone helper scripts"
           }
           
           IGNORE_FILES = {"README.md", "readme.md", "tree_output.txt"}
@@ -49,18 +46,13 @@ jobs:
                   return ""
               try:
                   with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
-                      content = f.read()
-                      
-                  # Strip out the YAML frontmatter block
-                  content = re.sub(r"^---\n.*?\n---\n", "", content, flags=re.DOTALL)
-                  
-                  # Scan the remaining text for the actual description
-                  for line in content.splitlines()[:15]:
-                      line = line.strip()
-                      if line.startswith("# Description:"):
-                          return line.replace("# Description:", "").strip()
-                      elif line.startswith("#") and not line.startswith("#!"):
-                          return line.lstrip("#").strip()
+                      for _ in range(15):
+                          line = f.readline().strip()
+                          if line.startswith("# Description:"):
+                              return line.replace("# Description:", "").strip()
+                          # Catch python/bash comments that might just be descriptions
+                          elif line.startswith("#") and not line.startswith("#!"):
+                              return line.lstrip("#").strip()
               except Exception:
                   pass
               return ""
@@ -70,12 +62,10 @@ jobs:
           
           # Recursively walk through all directories
           for root, dirs, files in os.walk("."):
-              # Skip hidden directories like .git and .github
               dirs[:] = [d for d in dirs if not d.startswith(".")]
               
-              # Check if the folder has any markdown files
-              md_files = [f for f in files if f.endswith(".md") and f not in IGNORE_FILES]
-              if md_files:
+              valid_files = [f for f in files if f not in IGNORE_FILES]
+              if valid_files:
                   directories.append(root)
                   
           directories = sorted(directories)
@@ -84,21 +74,21 @@ jobs:
               if d_path == ".":
                   continue
                   
-              folder_name = os.path.basename(d_path)
+              folder_name = d_path.lstrip("./")
               folder_desc = FOLDER_DESCS.get(folder_name, "")
               header_desc = f" ({folder_desc})" if folder_desc else ""
               
-              clean_path = d_path.lstrip("./")
-              table_output.append(f"### 📁 {clean_path}{header_desc}\n")
+              table_output.append(f"### 📁 {folder_name}{header_desc}\n")
               table_output.append("| File | Description |")
               table_output.append("|---|---|")
               
-              files = sorted([f for f in os.listdir(d_path) if f.endswith(".md") and f not in IGNORE_FILES])
+              # Include all files, not just .md
+              files = sorted([f for f in os.listdir(d_path) if os.path.isfile(os.path.join(d_path, f)) and f not in IGNORE_FILES])
               
               for f in files:
                   file_path = os.path.join(d_path, f)
                   desc = get_file_description(file_path)
-                  table_output.append(f"| <a href=\"{clean_path}/{f}\"><code>{f}</code></a> | {desc} |")
+                  table_output.append(f"| <a href=\"{folder_name}/{f}\"><code>{f}</code></a> | {desc} |")
               
               table_output.append("\n")
               
@@ -115,9 +105,9 @@ jobs:
           '
           
       - name: Sync with remote branch
-        run: git pull --rebase --autostash origin main
+        run: git pull --rebase --autostash origin main || true
           
       - name: Commit and Push changes
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: "ci: update python script to recursively scan subdirectories"
+          commit_message: "ci: fix auto-tables script for bash and python files"

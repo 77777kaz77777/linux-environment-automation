@@ -7,8 +7,16 @@ REPO_NAME="linux-environment-automation"
 BRANCH="main"
 
 # Available folders identified from repository layout
-VALID_FOLDERS=("configs" "desktop-tweaks" "security" "updates" "utils")
-
+VALID_FOLDERS=(
+  "configs"
+  "configs/setup-scripts"
+  "desktop-tweaks"
+  "provisioning"
+  "repo-management"
+  "security"
+  "updates"
+  "utils"
+)
 echo "Select a folder to pull from:"
 select FOLDER in "${VALID_FOLDERS[@]}"; do
   if [ -n "$FOLDER" ]; then

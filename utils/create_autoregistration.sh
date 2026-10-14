@@ -7,9 +7,9 @@ USERNAME="Admin"
 PASSWORD="zabbix"
 
 # Ensure jq is installed for JSON parsing
-if ! command -v jq &> /dev/null; then
-    echo "Installing required package 'jq'..."
-    dnf install -y jq
+if ! command -v jq &>/dev/null; then
+  echo "Installing required package 'jq'..."
+  dnf install -y jq
 fi
 
 echo "Authenticating with Zabbix API..."

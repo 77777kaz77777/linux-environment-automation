@@ -94,7 +94,6 @@ The repository also demonstrates practical implementations of infrastructure man
 | File | Description |
 |---|---|
 | <a href="utils/create-script-template.sh"><code>create-script-template.sh</code></a> | Interactive generator that scaffolds a new, executable Bash script with standard headers and strict error handling flags. |
-| <a href="utils/deploy_zabbix_agent.sh"><code>deploy_zabbix_agent.sh</code></a> | File: deploy_zabbix_agent.sh |
 | <a href="utils/manage-vpn.sh"><code>manage-vpn.sh</code></a> | Quick toggle script to bring WireGuard connections up or down using WG-Quick. |
 | <a href="utils/pull-script.sh"><code>pull-script.sh</code></a> | Interactively pulls and downloads an individual shell script from  a specified folder within the remote GitHub repository, then makes it executable. |
 | <a href="utils/system-health-report.sh"><code>system-health-report.sh</code></a> | Diagnostic script that generates a quick report on system health, disk usage, and failed services. |

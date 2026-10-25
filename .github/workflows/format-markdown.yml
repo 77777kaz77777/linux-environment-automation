@@ -1,0 +1,32 @@
+name: Format Markdown
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  prettier:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '21'
+          
+      - name: Run Prettier
+        run: |
+          npm install -g prettier
+          prettier --write "**/*.md"
+          
+      - name: Commit formatting changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: auto-format markdown files with Prettier"

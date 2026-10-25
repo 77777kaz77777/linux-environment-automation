@@ -15,9 +15,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-        
+        with:
+          fetch-depth: 0
+          
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@v4
         with:
           node-version: '21'
           
@@ -25,6 +27,9 @@ jobs:
         run: |
           npm install -g prettier
           prettier --write "**/*.md"
+          
+      - name: Sync with remote branch
+        run: git pull --rebase --autostash origin main
           
       - name: Commit formatting changes
         uses: stefanzweifel/git-auto-commit-action@v5

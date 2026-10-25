@@ -24,10 +24,10 @@ jobs:
           python3 -c '
           import os
           
-          extensions = (".sh", ".py", ".json")
+          extensions = (".sh", ".py", ".json", ".toml", ".jsonc", ".conf", ".txt", ".service", ".timer")
           exclude_dirs = {".git", ".github"}
           
-          output = ["# Source Code Reference\n\nAutomatically generated list of all scripts in this repository.\n"]
+          output = ["# Source Code Reference\n\nAutomatically generated list of all scripts, configs, and systemd units in this repository.\n"]
           
           for root, dirs, files in os.walk("."):
               dirs[:] = [d for d in dirs if d not in exclude_dirs]
@@ -36,7 +36,19 @@ jobs:
                       filepath = os.path.join(root, file).lstrip("./")
                       ext = filepath.split(".")[-1]
                       
-                      lang = "bash" if ext == "sh" else "python" if ext == "py" else "json"
+                      # Map extensions to proper markdown syntax highlighting languages
+                      lang_map = {
+                          "sh": "bash",
+                          "py": "python",
+                          "json": "json",
+                          "jsonc": "json",
+                          "toml": "toml",
+                          "conf": "ini",
+                          "txt": "text",
+                          "service": "ini",
+                          "timer": "ini"
+                      }
+                      lang = lang_map.get(ext, "text")
                       
                       output.append(f"## {filepath}\n")
                       output.append(f"```{lang} title=\"{filepath}\"")

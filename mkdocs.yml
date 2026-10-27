@@ -8,5 +8,7 @@ theme:
     primary: deep purple
  
 markdown_extensions:
-- pymdownx.snippets
-
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.snippets

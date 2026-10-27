@@ -9,3 +9,5 @@ theme:
  
 markdown_extensions:
   - pymdownx.snippets
+  - pymdownx.superfences
+

@@ -6,8 +6,7 @@ theme:
   palette:
     scheme: slate
     primary: deep purple
-  features:
-    - content.code.copy
+ 
 markdown_extensions:
   - pymdownx.superfences
   - pymdownx.details

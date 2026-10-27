@@ -1,11 +1,10 @@
-
----
 name: Linter Bot
 on:
   push:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+
 jobs:
   lint-and-fix:
     name: Auto-Fix Codebase
@@ -16,8 +15,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.head_ref }}
-      
+          # Uses head_ref for PRs, falls back to ref_name (main) for pushes
+          ref: ${{ github.head_ref || github.ref_name }}
+          # Fetches full history so git pull/rebase works correctly
+          fetch-depth: 0 
+
       - name: Setup Latest Node.js
         uses: actions/setup-node@v7
         with:
@@ -41,6 +43,13 @@ jobs:
       
       - name: Lint YAML (yamllint)
         run: yamllint . || true
+
+      - name: Sync with Remote (Resolve Divergence)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Stashes any linter fixes, pulls the latest commits, then reapplies the fixes
+          git pull --rebase --autostash origin ${{ github.head_ref || github.ref_name }} || true
       
       - name: Commit and Push Changes
         uses: stefanzweifel/git-auto-commit-action@v7

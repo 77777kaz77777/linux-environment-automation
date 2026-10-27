@@ -58,7 +58,7 @@ jobs:
           with open("code-reference.md", "w") as f:
               f.write("\n".join(output))
           '
-          
+      - run: python generate_site_config.py
       - run: zensical build
       - uses: actions/upload-pages-artifact@v5
         with:

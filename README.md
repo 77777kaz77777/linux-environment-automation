@@ -12,25 +12,28 @@ The repository also demonstrates practical implementations of infrastructure man
 ### 📁 configs (Terminal & CLI tool dotfiles)
 
 | File | Description |
-| --- | --- |
+|---|---|
 | <a href="configs/alacritty.toml"><code>alacritty.toml</code></a> | Configuration file for the Alacritty terminal emulator. |
 | <a href="configs/dnf.conf"><code>dnf.conf</code></a> | Optimized Fedora DNF package manager config tweaked for max download speeds, parallel downloads, and clean dependency management. |
 | <a href="configs/fastfetch-laptop1-config.jsonc"><code>fastfetch-laptop1-config.jsonc</code></a> | Fastfetch system info configuration for the primary laptop (ASUS ROG Zephyrus G15). |
 | <a href="configs/fastfetch-laptop2-config.jsonc"><code>fastfetch-laptop2-config.jsonc</code></a> | Fastfetch system info configuration for the secondary laptop (Lenovo ThinkPad T470). |
 
+
 ### 📁 configs/setup-scripts (Dotfile Deployment Scripts)
 
 | File | Description |
-| --- | --- |
+|---|---|
 | <a href="configs/setup-scripts/setup-alacritty.sh"><code>setup-alacritty.sh</code></a> | Automates Alacritty installation, font setup, and configuration for Fedora |
 | <a href="configs/setup-scripts/setup-bashrc.sh"><code>setup-bashrc.sh</code></a> | safely installs the custom .bashrc configuration and aliases. |
+
 
 ### 📁 desktop-tweaks (UI customization & desktop scripts)
 
 | File | Description |
-| --- | --- |
+|---|---|
 | <a href="desktop-tweaks/konsole-white-on-black.sh"><code>konsole-white-on-black.sh</code></a> | Script to force the Konsole terminal background to solid black (#000000) with pure white text. |
 | <a href="desktop-tweaks/set-login-wallpaper.sh"><code>set-login-wallpaper.sh</code></a> | Script to change and apply the display manager wallpaper. |
+
 
 ### 📁 desktop-tweaks/docs
 
@@ -38,24 +41,27 @@ The repository also demonstrates practical implementations of infrastructure man
 |---|---|
 | <a href="desktop-tweaks/docs/gnome-layout-guide.txt"><code>gnome-layout-guide.txt</code></a> | GNOME / Desktop layout modification guide |
 
+
 ### 📁 provisioning (Workstation Bootstrap & Setup)
 
 | File | Description |
-| --- | --- |
+|---|---|
 | <a href="provisioning/fedora-rog-setup.sh"><code>fedora-rog-setup.sh</code></a> | Optimization and Setup Script for ASUS ROG Zephyrus G15 on Fedora 44 KDE |
 | <a href="provisioning/setup.sh"><code>setup.sh</code></a> | Automated Linux workstation bootstrap, toolstack installer, repository deployment, and desktop setup. |
+
 
 ### 📁 repo-management (LLM Metadata & Repo Organization)
 
 | File | Description |
-| --- | --- |
+|---|---|
 | <a href="repo-management/apply-organization.py"><code>apply-organization.py</code></a> | This script reads the generated JSON manifest, moves and renames the script files into sanitized category subdirectories, and automatically compiles a ⁠README.md⁠ index table documenting them all. |
 | <a href="repo-management/organize-scripts.py"><code>organize-scripts.py</code></a> | This script scans a local directory of bash scripts, uses a local LLM via LM Studio to analyze and categorize each one, and compiles the metadata into a JSON manifest file. |
+
 
 ### 📁 security (Antivirus & system defense utilities)
 
 | File | Description |
-| --- | --- |
+|---|---|
 | <a href="security/clamav-nightly-scan.sh"><code>clamav-nightly-scan.sh</code></a> | ClamAV scan script designed to run nightly. |
 | <a href="security/clamav-scan.service"><code>clamav-scan.service</code></a> | Systemd service unit responsible for executing the nightly ClamAV scan. |
 | <a href="security/clamav-scan.timer"><code>clamav-scan.timer</code></a> | Systemd timer unit that schedules the ClamAV scans to run at 2:00 AM |
@@ -68,10 +74,11 @@ The repository also demonstrates practical implementations of infrastructure man
 | <a href="security/setup-clamav-fedora.sh"><code>setup-clamav-fedora.sh</code></a> | Automated script to install and set up ClamAV on Fedora. |
 | <a href="security/update-clamav-signatures.sh"><code>update-clamav-signatures.sh</code></a> | Script to manually trigger Freshclam and update antivirus signatures. |
 
+
 ### 📁 updates (Distro maintenance & update scripts)
 
 | File | Description |
-| --- | --- |
+|---|---|
 | <a href="updates/clean-mint.sh"><code>clean-mint.sh</code></a> | Cleanup routine for clearing out old APT packages and caches on Linux Mint. |
 | <a href="updates/debloat-fedora-kde.sh"><code>debloat-fedora-kde.sh</code></a> | Script to remove Akonadi/PIM bloat, unused media tools, office suites, and clear caches on Fedora KDE. |
 | <a href="updates/system-cleanup.sh"><code>system-cleanup.sh</code></a> | Safe cleanup script for wiping temporary files and old system logs |
@@ -81,10 +88,11 @@ The repository also demonstrates practical implementations of infrastructure man
 | <a href="updates/update-mint.sh"><code>update-mint.sh</code></a> | Automated system update script for Debian/Mint handling APT, Flatpaks, and cleanups. |
 | <a href="updates/update-ubuntu.sh"><code>update-ubuntu.sh</code></a> | Automated system update and maintenance script tailored for Ubuntu and Debian. |
 
+
 ### 📁 utils (General standalone helper scripts)
 
 | File | Description |
-| --- | --- |
+|---|---|
 | <a href="utils/create-script-template.sh"><code>create-script-template.sh</code></a> | Interactive generator that scaffolds a new, executable Bash script with standard headers and strict error handling flags. |
 | <a href="utils/manage-vpn.sh"><code>manage-vpn.sh</code></a> | Quick toggle script to bring WireGuard connections up or down using WG-Quick. |
 | <a href="utils/pull-script.sh"><code>pull-script.sh</code></a> | Interactively pulls and downloads an individual shell script from  a specified folder within the remote GitHub repository, then makes it executable. |

@@ -1,14 +1,84 @@
 site_name: Linux Environment Automation
+site_description: Automated configuration, provisioning, and dotfiles for Linux environments.
 site_url: https://77777kaz77777.github.io/linux-environment-automation/
-docs_dir: .
+repo_url: https://github.com/77777kaz77777/linux-environment-automation
+repo_name: 77777kaz77777/linux-environment-automation
+edit_uri: edit/main/docs/
+
+# Using "." exposes mkdocs.yml and git files to the build.
+# Store your markdown files in a dedicated "docs" directory instead.
+docs_dir: docs
+
 theme:
   name: material
+  language: en
   palette:
-    scheme: slate
-    primary: deep purple
- 
+    # Dark mode (default)
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    # Light mode fallback
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.code.select
+    - content.tabs.link
+    - navigation.expand
+    - navigation.footer
+    - navigation.indexes
+    - navigation.Instant
+    - navigation.path
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+
+plugins:
+  - search
+
 markdown_extensions:
   - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.betterem
+  - pymdownx.caret
   - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets:
+      check_paths: true
   - pymdownx.superfences
-  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+exclude_docs: |
+  README.md
+  LICENSE

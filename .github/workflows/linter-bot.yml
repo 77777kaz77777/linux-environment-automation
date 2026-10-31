@@ -1,4 +1,5 @@
 name: Linter Bot
+
 on:
   push:
     branches: ["main"]
@@ -8,7 +9,7 @@ on:
 jobs:
   lint-and-fix:
     name: Auto-Fix Codebase
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
@@ -18,29 +19,29 @@ jobs:
           # Uses head_ref for PRs, falls back to ref_name (main) for pushes
           ref: ${{ github.head_ref || github.ref_name }}
           # Fetches full history so git pull/rebase works correctly
-          fetch-depth: 0 
+          fetch-depth: 0
 
       - name: Setup Latest Node.js
         uses: actions/setup-node@v7
         with:
           node-version: 'current'
-      
+
       - name: Setup Python
         uses: actions/setup-python@v7
         with:
           python-version: '3.x'
-      
+
       - name: Install Python Linters
         run: |
           python -m pip install --upgrade pip
           pip install ruff yamllint
-      
+
       - name: Auto-Fix Python (Ruff)
         run: ruff check . --fix --unsafe-fixes --exit-zero
-      
+
       - name: Auto-Fix JSON and YAML (Prettier)
         run: npx --yes prettier --write "**/*.{json,yml,yaml}" || true
-      
+
       - name: Lint YAML (yamllint)
         run: yamllint . || true
 
@@ -50,7 +51,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # Stashes any linter fixes, pulls the latest commits, then reapplies the fixes
           git pull --rebase --autostash origin ${{ github.head_ref || github.ref_name }} || true
-      
+
       - name: Commit and Push Changes
         uses: stefanzweifel/git-auto-commit-action@v7
         with:

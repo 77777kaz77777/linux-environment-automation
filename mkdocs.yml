@@ -18,22 +18,30 @@ exclude_docs: |
 
 theme:
   name: material
-  variant: classic
+  variant: modern
   language: en
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    logo: lucide/terminal
+    repo: fontawesome/brands/github
   palette:
+    # Dark mode (Pure Monochrome Dark)
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: deep purple
-      accent: purple
+      primary: black
+      accent: white
       toggle:
-        icon: material/brightness-4
+        icon: lucide/moon
         name: Switch to light mode
+    # Light mode (Clean Monochrome Light)
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: deep purple
-      accent: purple
+      primary: white
+      accent: black
       toggle:
-        icon: material/brightness-7
+        icon: lucide/sun
         name: Switch to dark mode
   features:
     - content.action.edit

@@ -3,7 +3,6 @@ site_description: Automated configuration, provisioning, and dotfiles for Linux 
 site_url: https://77777kaz77777.github.io/linux-environment-automation/
 repo_url: https://github.com/77777kaz77777/linux-environment-automation
 repo_name: 77777kaz77777/linux-environment-automation
-edit_uri: edit/main/
 
 docs_dir: .
 
@@ -44,8 +43,6 @@ theme:
         icon: lucide/sun
         name: Switch to dark mode
   features:
-    - content.action.edit
-    - content.action.view
     - content.code.annotate
     - content.code.copy
     - content.code.select

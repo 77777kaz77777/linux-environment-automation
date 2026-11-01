@@ -9,11 +9,13 @@ docs_dir: .
 exclude_docs: |
   mkdocs.yml
   zensical.toml
+  .markdownlint.yaml
   LICENSE
   *.sh
   *.py
   .github/
   .gitignore
+  .obsidian/
 
 theme:
   name: material
@@ -47,11 +49,12 @@ theme:
     - content.code.copy
     - content.code.select
     - content.tabs.link
-    - navigation.expand
     - navigation.footer
     - navigation.indexes
     - navigation.instant
+    - navigation.instant.progress
     - navigation.path
+    - navigation.prune
     - navigation.sections
     - navigation.top
     - navigation.tracking
@@ -59,6 +62,9 @@ theme:
     - search.share
     - search.suggest
     - toc.follow
+
+extra_css:
+  - extra.css
 
 plugins:
   - search

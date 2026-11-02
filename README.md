@@ -11,7 +11,7 @@ Centralized operations toolkit for Linux workstation provisioning, security hard
 
 | File | Description |
 |---|---|
-| <a href="configs/AdGuardHome-backup.yaml"><code>AdGuardHome-backup.yaml</code></a> |  |
+| <a href="configs/AdGuardHome-backup.yaml"><code>AdGuardHome-backup.yaml</code></a> | personal AdGuardHome config |
 | <a href="configs/alacritty.toml"><code>alacritty.toml</code></a> | Configuration file for the Alacritty terminal emulator. |
 | <a href="configs/dnf.conf"><code>dnf.conf</code></a> | Optimized Fedora DNF package manager config tweaked for max download speeds, parallel downloads, and clean dependency management. |
 | <a href="configs/fastfetch-laptop1-config.jsonc"><code>fastfetch-laptop1-config.jsonc</code></a> | Fastfetch system info configuration for the primary laptop (ASUS ROG Zephyrus G15). |

@@ -1,3 +1,5 @@
+##personal AdGuardHome config 
+
 http:
   pprof:
     port: 6060

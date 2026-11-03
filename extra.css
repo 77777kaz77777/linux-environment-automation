@@ -20,7 +20,7 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-/* 3. Clean Thin Sidebar Scrollbars */
+/* 3. Clean Thin Sidebar Scrollbars (Removes thick blue/grey scrollbar) */
 .md-sidebar__scrollwrap {
   scrollbar-width: thin !important;
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent !important;
@@ -39,7 +39,7 @@
   border-radius: 4px !important;
 }
 
-/* 4. Left Sidebar — Category Section Headers */
+/* 4. Left Sidebar — Category Section Headers (Ansible, Containers, Fedora, etc.) */
 .md-nav--primary .md-nav__item--section {
   margin-top: 1.2rem !important;
   margin-bottom: 0.35rem !important;
@@ -80,6 +80,7 @@
   color: rgba(0, 0, 0, 0.75) !important;
 }
 
+/* Hover state on any sidebar item */
 .md-nav--primary .md-nav__link:hover {
   background-color: rgba(255, 255, 255, 0.06) !important;
   color: #ffffff !important;
@@ -90,7 +91,7 @@
   color: #000000 !important;
 }
 
-/* Active/Selected Page Pill */
+/* Active/Selected Page Pill (Overrides Zensical Modern's blue highlight box) */
 .md-nav--primary .md-nav__item .md-nav__link--active,
 .md-nav--primary .md-nav__link--active {
   background-color: rgba(255, 255, 255, 0.1) !important;
@@ -106,7 +107,7 @@
   box-shadow: inset 2px 0 0 #000000 !important;
 }
 
-/* 6. Nested Subfolders Tree Line */
+/* 6. Nested Subfolders Tree Line (e.g., linux-general subdirectories) */
 .md-nav--primary .md-nav__item--nested .md-nav > .md-nav__list {
   border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
   margin-left: 0.7rem !important;
@@ -119,7 +120,7 @@
   border-left: 1px solid rgba(0, 0, 0, 0.12) !important;
 }
 
-/* 7. Right Sidebar ("On this page") */
+/* 7. Right Sidebar ("On this page" Table of Contents) */
 .md-nav--secondary .md-nav__title {
   font-size: 0.72rem !important;
   font-weight: 700 !important;
@@ -128,9 +129,17 @@
   color: rgba(255, 255, 255, 0.45) !important;
 }
 
+[data-md-color-scheme="default"] .md-nav--secondary .md-nav__title {
+  color: rgba(0, 0, 0, 0.48) !important;
+}
+
 .md-nav--secondary .md-nav__list {
   border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
   padding-left: 0.45rem !important;
+}
+
+[data-md-color-scheme="default"] .md-nav--secondary .md-nav__list {
+  border-left: 1px solid rgba(0, 0, 0, 0.12) !important;
 }
 
 .md-nav--secondary .md-nav__link {
@@ -140,18 +149,32 @@
   color: rgba(255, 255, 255, 0.62) !important;
 }
 
+[data-md-color-scheme="default"] .md-nav--secondary .md-nav__link {
+  color: rgba(0, 0, 0, 0.62) !important;
+}
+
 .md-nav--secondary .md-nav__link--active {
   color: #ffffff !important;
   font-weight: 600 !important;
   background-color: rgba(255, 255, 255, 0.07) !important;
 }
 
-/* 8. Modern Card Tables */
+[data-md-color-scheme="default"] .md-nav--secondary .md-nav__link--active {
+  color: #000000 !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 8. Modern Card Tables in Main Content */
 .md-typeset table:not([class]) {
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 8px !important;
   overflow: hidden !important;
   background-color: var(--md-default-bg-color--light) !important;
+}
+
+[data-md-color-scheme="default"] .md-typeset table:not([class]) {
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  background-color: #ffffff !important;
 }
 
 .md-typeset table:not([class]) th {
@@ -163,7 +186,16 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
+[data-md-color-scheme="default"] .md-typeset table:not([class]) th {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
+}
+
 .md-typeset table:not([class]) td {
   border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
   vertical-align: middle !important;
+}
+
+[data-md-color-scheme="default"] .md-typeset table:not([class]) td {
+  border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
 }

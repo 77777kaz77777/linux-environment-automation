@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: '3.x'
-      - run: pip install zensical
+      - run: pip install zensical mkdocs-gen-files
       - run: python generate_site_config.py
       - run: zensical build
       - uses: actions/upload-pages-artifact@v5

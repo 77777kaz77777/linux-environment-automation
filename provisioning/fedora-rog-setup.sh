@@ -1,8 +1,8 @@
 #!/bin/bash
-# Optimization and Setup Script for ASUS ROG Zephyrus G15 on Fedora 44 KDE
+# Optimization and Setup Script for ASUS ROG Zephyrus G15 on Fedora  KDE
 # Hardware Target: AMD Ryzen 9 6900HS & NVIDIA RTX 3070 Ti
 
-echo "Starting ASUS ROG optimization setup for Fedora 44..."
+echo "Starting ASUS ROG optimization setup for Fedora ..."
 
 # 1. Purge the deprecated COPR repository and legacy packages
 echo "Purging old lukenukem/asus-linux COPR repository and old packages..."

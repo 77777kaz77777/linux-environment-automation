@@ -39,7 +39,7 @@ theme:
     # Light mode (Clean Monochrome Light)
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: white
+      primary: black
       accent: black
       toggle:
         icon: lucide/sun
@@ -68,6 +68,9 @@ extra_css:
 
 plugins:
   - search
+  - gen-files:
+      scripts:
+        - gen_pages.py
 
 markdown_extensions:
   - admonition

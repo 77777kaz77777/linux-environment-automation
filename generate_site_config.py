@@ -104,7 +104,12 @@ def build_nav(directory='.'):
 def update_gitignore():
     gitignore_path = Path('.gitignore')
     ignore_entries = [f"*{ext}.md" for ext in TARGET_EXTENSIONS]
-    content = f.read() if gitignore_path.exists() else ""
+    
+    if gitignore_path.exists():
+        with open(gitignore_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+    else:
+        content = ""
         
     appends = [entry for entry in ignore_entries if entry not in content]
     if appends:

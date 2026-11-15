@@ -71,18 +71,36 @@ fi
 # -----------------------------------------------------------------
 # 5. Git Source Packages Updates (grub-btrfs)
 # -----------------------------------------------------------------
-TARGET_USER="${SUDO_USER:-$USER}"
-USER_HOME=$(getent passwd "$TARGET_USER" | cut -d: -f6)
-GRUB_BTRFS_DIR="${USER_HOME}/grub-btrfs"
+TARGET_USER="${SUDO_USER:-${USER:-root}}"
+USER_HOME=$(getent passwd "$TARGET_USER" | cut -d: -f6 || true)
+GRUB_BTRFS_DIR="${USER_HOME:+${USER_HOME}/grub-btrfs}"
 
-if [ -d "$GRUB_BTRFS_DIR/.git" ]; then
+if [ -n "$GRUB_BTRFS_DIR" ] && [ -d "$GRUB_BTRFS_DIR/.git" ]; then
   log_info "Checking for grub-btrfs git repository updates..."
-  git -C "$GRUB_BTRFS_DIR" pull || log_warn "Failed to pull updates for grub-btrfs."
-  make -C "$GRUB_BTRFS_DIR" install || log_warn "Failed to reinstall grub-btrfs."
-  restorecon -Rv /usr/bin/grub-btrfs* /usr/lib/systemd/system/grub-btrfsd.service >/dev/null 2>&1 || true
-  systemctl daemon-reload || true
-  systemctl restart grub-btrfsd || true
-  log_success "grub-btrfs up to date."
+
+  # The clone belongs to the regular user. Running git as root here fails with
+  # "detected dubious ownership" and would leave root-owned files in .git, so
+  # run git as the owner instead.
+  as_owner() { sudo -u "$TARGET_USER" -H git -C "$GRUB_BTRFS_DIR" "$@"; }
+
+  OLD_HEAD=$(as_owner rev-parse HEAD 2>/dev/null || echo "")
+  if as_owner pull --ff-only; then
+    NEW_HEAD=$(as_owner rev-parse HEAD 2>/dev/null || echo "")
+
+    if [ -n "$OLD_HEAD" ] && [ "$OLD_HEAD" = "$NEW_HEAD" ]; then
+      log_success "grub-btrfs already up to date (no reinstall needed)."
+    elif make -C "$GRUB_BTRFS_DIR" install; then
+      restorecon -Rv /usr/bin/grub-btrfs* /usr/lib/systemd/system/grub-btrfsd.service >/dev/null 2>&1 || true
+      systemctl daemon-reload || true
+      systemctl restart grub-btrfsd || true
+      log_success "grub-btrfs updated to ${NEW_HEAD:0:7} and reinstalled."
+    else
+      log_warn "grub-btrfs pulled but 'make install' failed; previous install left in place."
+    fi
+  else
+    # Don't reinstall stale or half-merged code if the pull failed.
+    log_warn "Failed to pull grub-btrfs updates; skipping reinstall."
+  fi
 fi
 
 # -----------------------------------------------------------------

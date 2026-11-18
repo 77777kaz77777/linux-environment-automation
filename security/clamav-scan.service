@@ -1,8 +1,12 @@
 # Systemd service unit responsible for executing the nightly ClamAV scan.
 [Unit]
 Description=Trigger multi-threaded ClamAV system scan
-After=clamav-daemon.service
+# clamd@scan is Fedora's daemon; clamav-daemon is Debian/Ubuntu's. Missing ones are ignored.
+Wants=clamd@scan.service clamav-daemon.service
+After=clamd@scan.service clamav-daemon.service
 
 [Service]
-Type=simple
+Type=oneshot
 ExecStart=/usr/local/bin/clamav-nightly-scan.sh
+Nice=10
+IOSchedulingClass=idle

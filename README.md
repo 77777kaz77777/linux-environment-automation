@@ -61,7 +61,7 @@ Centralized operations toolkit for Linux workstation provisioning, security hard
 
 | File | Description |
 |---|---|
-| <a href="security/clamav-nightly-scan.sh"><code>clamav-nightly-scan.sh</code></a> | ClamAV scan script designed to run nightly. |
+| <a href="security/clamav-nightly-scan.sh"><code>clamav-nightly-scan.sh</code></a> | ClamAV scan script designed to run nightly (via clamav-nightly-scan.timer). |
 | <a href="security/clamav-scan.service"><code>clamav-scan.service</code></a> | Systemd service unit responsible for executing the nightly ClamAV scan. |
 | <a href="security/clamav-scan.timer"><code>clamav-scan.timer</code></a> | Systemd timer unit that schedules the ClamAV scans to run at 2:00 AM |
 | <a href="security/fedora-kde-hardening.sh"><code>fedora-kde-hardening.sh</code></a> | Automated security hardening, kernel parameter tuning, and session protection script designed for Fedora KDE. |

@@ -31,7 +31,7 @@ Centralized operations toolkit for Linux workstation provisioning, security hard
 | File | Description |
 |---|---|
 | <a href="desktop-tweaks/konsole-white-on-black.sh"><code>konsole-white-on-black.sh</code></a> | Script to force the Konsole terminal background to solid black (#000000) with pure white text. |
-| <a href="desktop-tweaks/set-login-wallpaper.sh"><code>set-login-wallpaper.sh</code></a> | Script to change and apply the display manager wallpaper. |
+| <a href="desktop-tweaks/set-login-wallpaper.sh"><code>set-login-wallpaper.sh</code></a> | Script to set a solid black background on the GDM login screen (Ubuntu's GDM). |
 
 
 ### 📁 desktop-tweaks/docs

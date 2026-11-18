@@ -2,7 +2,7 @@
 # Script to force the Konsole terminal background to solid black (#000000) with pure white text.
 set -euo pipefail
 
-# 1. Apply immediate runtime change using standard OSC Escape Sequences and PS1 override
+# 1. Apply immediate runtime change using standard OSC Escape Sequences
 apply_runtime_colors() {
   # OSC 10: Set default text foreground color to White (#FFFFFF)
   printf '\033]10;#FFFFFF\007'
@@ -10,8 +10,8 @@ apply_runtime_colors() {
   # OSC 11: Set default background color to Black (#000000)
   printf '\033]11;#000000\007'
 
-  # Override immediate subshell prompt variable to remove green ANSI escape codes
-  export PS1='\u@\h:\w\$ '
+  # (The prompt can't be changed from here: a script runs in its own shell.
+  #  update_bashrc_prompt below makes the plain prompt permanent for new terminals.)
 
   # Clear screen buffer to repaint the entire background canvas immediately
   clear

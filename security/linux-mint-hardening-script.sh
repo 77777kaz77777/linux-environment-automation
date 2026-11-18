@@ -133,8 +133,9 @@ PROFILE_FILES=(
 
 for file in "${PROFILE_FILES[@]}"; do
   if [[ -f "${file}" ]]; then
-    if grep -q "umask" "${file}"; then
-      sed -i -E 's/umask [0-9]{3,4}/umask 027/g' "${file}"
+    # Only change real umask commands, not comments or text that mentions umask
+    if grep -qE '^[[:space:]]*umask[[:space:]]+[0-9]{3,4}' "${file}"; then
+      sed -i -E 's/^([[:space:]]*)umask[[:space:]]+[0-9]{3,4}/\1umask 027/' "${file}"
     else
       echo "umask 027" >>"${file}"
     fi

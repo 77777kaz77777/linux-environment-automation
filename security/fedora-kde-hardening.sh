@@ -9,11 +9,12 @@ if [[ "${EUID}" -ne 0 ]]; then
   exit 1
 fi
 
-LOG_FILE="/var/log/fedora44-hardening.log"
+FEDORA_VERSION=$(. /etc/os-release 2>/dev/null && echo "${VERSION_ID:-}")
+LOG_FILE="/var/log/fedora-kde-hardening.log"
 exec > >(tee -a "${LOG_FILE}") 2>&1
 
 echo "================================================================="
-echo " Starting Fedora 44 KDE Hardening Script"
+echo " Starting Fedora ${FEDORA_VERSION} KDE Hardening Script"
 echo " Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 echo "================================================================="
 
@@ -82,16 +83,14 @@ Timeout=10
 LockOnResume=true
 EOF
 
-# Disable automatic mounting of unknown storage devices while preserving KDE Connect SFTP mounts
+# Disable automatic mounting of removable storage (keys from KDE's solid-device-automounter).
+# KDE Connect's SFTP mounts are not handled by this module, so they keep working.
 cat <<'EOF' >"${KDE_GLOBAL_CONFIG_DIR}/kded_device_automounterrc"
-[GlobalSettings]
-automountEnabled=false
-automountOnLogin=false
-automountOnPlugin=false
-
-[Automounting]
-# Explicitly keep KDE Connect remote filesystem integration operational
-automountKdeConnect=true
+[General]
+AutomountEnabled=false
+AutomountOnLogin=false
+AutomountOnPlugin=false
+AutomountUnknownDevices=false
 EOF
 
 echo "================================================================="

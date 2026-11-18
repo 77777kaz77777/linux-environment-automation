@@ -28,6 +28,15 @@ pacman -S --needed --noconfirm ufw
 ufw default deny incoming
 ufw default allow outgoing
 
+# Keep KVM/libvirt NAT networking working: UFW's default policy drops routed
+# (forwarded) traffic, which would cut off VMs on the default virbr0 network.
+if ip link show virbr0 >/dev/null 2>&1 || systemctl list-unit-files libvirtd.service >/dev/null 2>&1; then
+  ufw allow in on virbr0 comment 'libvirt guests'
+  ufw route allow in on virbr0 comment 'libvirt NAT out'
+  ufw route allow out on virbr0 comment 'libvirt NAT in'
+  echo "[+] Allowed libvirt (virbr0) traffic through UFW."
+fi
+
 # Enable systemd unit and UFW service
 systemctl enable ufw.service
 ufw --force enable
@@ -142,10 +151,28 @@ sysctl --system >/dev/null
 # ------------------------------------------------------------------------------
 echo "[5/6] Checking and Hardening SSH Configuration..."
 
+set_sshd_option() {
+  # Replace the option if present (commented or not), otherwise append it
+  if grep -qE "^#?$1\b" /etc/ssh/sshd_config; then
+    sed -i -E "s/^#?$1\b.*/$1 $2/" /etc/ssh/sshd_config
+  else
+    echo "$1 $2" >>/etc/ssh/sshd_config
+  fi
+}
+
 if [ -f /etc/ssh/sshd_config ]; then
-  sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
-  sed -i 's/^#\?MaxAuthTries.*/MaxAuthTries 3/' /etc/ssh/sshd_config
-  echo "[+] SSH configuration hardened."
+  cp -a /etc/ssh/sshd_config "/etc/ssh/sshd_config.bak-$(date +%Y%m%d-%H%M%S)"
+  set_sshd_option PermitRootLogin no
+  set_sshd_option MaxAuthTries 3
+
+  # Validate before applying so a typo can't lock you out, then reload if running
+  if sshd -t; then
+    systemctl try-reload-or-restart sshd.service
+    echo "[+] SSH configuration hardened and reloaded."
+  else
+    echo "[!] sshd -t rejected the new config; restoring the backup."
+    cp -a "$(ls -t /etc/ssh/sshd_config.bak-* | head -1)" /etc/ssh/sshd_config
+  fi
 else
   echo "[*] OpenSSH server not installed, skipping SSH file changes."
 fi
@@ -155,9 +182,19 @@ fi
 # ------------------------------------------------------------------------------
 echo "[6/6] Securing /tmp mount options..."
 
+# noexec on /tmp blocks some installers and build tools (they run files from /tmp),
+# so ask first. Non-interactive runs skip it.
 if ! grep -q "tmpfs /tmp" /etc/fstab; then
-  echo "tmpfs /tmp tmpfs defaults,noexec,nosuid,nodev,mode=1777 0 0" >>/etc/fstab
-  echo "[+] Secured /tmp mount point added to /etc/fstab."
+  answer="n"
+  if [ -t 0 ]; then
+    read -rp "Mount /tmp with noexec? Some installers/builds may break. [y/N]: " answer
+  fi
+  if [[ "$answer" =~ ^[Yy]$ ]]; then
+    echo "tmpfs /tmp tmpfs defaults,noexec,nosuid,nodev,mode=1777 0 0" >>/etc/fstab
+    echo "[+] Secured /tmp mount point added to /etc/fstab (active after reboot)."
+  else
+    echo "[*] Skipped /tmp noexec."
+  fi
 else
   echo "[*] /tmp is already configured in /etc/fstab."
 fi

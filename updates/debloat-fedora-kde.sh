@@ -15,7 +15,7 @@ mkdir -p "$LOGDIR"
 chmod 755 "$LOGDIR"
 
 # Identify OS release dynamically
-FEDORA_VERSION=$(grep -oP '(?<=^VERSION_ID=).*' /etc/os-release | tr -d '"' 2>/dev/null || echo "Fedora")
+FEDORA_VERSION=$(. /etc/os-release 2>/dev/null && echo "${VERSION_ID:-}")
 
 # Logger Function
 log_message() {
@@ -34,14 +34,30 @@ fi
 
 log_message "=== Starting Fedora $FEDORA_VERSION KDE Plasma Debloat & Cleanup ==="
 
-# Define DNF options properly as an array to prevent word-splitting and parsing errors
-DNF_OPTS=(--setopt=strict=0 -y)
+# Remove only the packages that are actually installed. Asking dnf to remove a
+# package that isn't installed can make it exit with an error, which would stop
+# this script part-way (set -e). Patterns like 'openoffice*' are matched by rpm.
+remove_installed() {
+  local label="$1"
+  shift
+  local present=() pkg
+  for pkg in "$@"; do
+    while IFS= read -r name; do
+      [[ -n "$name" ]] && present+=("$name")
+    done < <(rpm -qa --qf '%{NAME}\n' "$pkg" 2>/dev/null | sort -u)
+  done
+  if [[ ${#present[@]} -eq 0 ]]; then
+    log_message "${label}: nothing to remove."
+    return 0
+  fi
+  log_message "${label}: removing ${present[*]}"
+  dnf remove -y "${present[@]}" 2>&1 | tee -a "$LOGFILE"
+}
 
 # -----------------------------------------------------------------------------
 # 1. Remove KDE PIM (Personal Information Management) & Akonadi
 # -----------------------------------------------------------------------------
-log_message "Removing KDE PIM stack (KMail, KOrganizer, Kontact) and Akonadi..."
-dnf remove "${DNF_OPTS[@]}" \
+remove_installed "KDE PIM stack and Akonadi" \
   akonadi \
   akonadi-server \
   kmail \
@@ -50,13 +66,12 @@ dnf remove "${DNF_OPTS[@]}" \
   kontact \
   knotes \
   akregator \
-  kdepim-runtime 2>&1 | tee -a "$LOGFILE"
+  kdepim-runtime
 
 # -----------------------------------------------------------------------------
 # 2. Remove Redundant Utilities, Media Players, Games & Extra Apps
 # -----------------------------------------------------------------------------
-log_message "Removing unnecessary default desktop applications and extra bloat..."
-dnf remove "${DNF_OPTS[@]}" \
+remove_installed "Extra desktop apps" \
   dragonplayer \
   elisa-player \
   kmahjongg \
@@ -69,7 +84,7 @@ dnf remove "${DNF_OPTS[@]}" \
   kwrite \
   krdc \
   krfb \
-  fedora-media-writer \
+  mediawriter \
   ktorrent \
   falkon \
   konqueror \
@@ -78,25 +93,14 @@ dnf remove "${DNF_OPTS[@]}" \
   skanpage \
   neochat \
   tokodon \
-  kget 2>&1 | tee -a "$LOGFILE"
+  kget
 
 # -----------------------------------------------------------------------------
 # 3. Remove Office Suites (LibreOffice / OpenOffice)
 # -----------------------------------------------------------------------------
-log_message "Removing LibreOffice and OpenOffice components..."
-dnf remove "${DNF_OPTS[@]}" \
-  libreoffice \
-  libreoffice-core \
-  libreoffice-writer \
-  libreoffice-calc \
-  libreoffice-impress \
-  libreoffice-draw \
-  libreoffice-math \
-  libreoffice-base \
-  libreoffice-emailmerge \
-  libreoffice-gtk3 \
-  libreoffice-help-en \
-  openoffice* 2>&1 | tee -a "$LOGFILE"
+remove_installed "Office suites" \
+  'libreoffice*' \
+  'openoffice*'
 
 # -----------------------------------------------------------------------------
 # 4. Clean DNF Packages, Orphans, and System Caches
@@ -118,7 +122,7 @@ if command -v flatpak >/dev/null 2>&1; then
   flatpak uninstall --unused -y 2>&1 | tee -a "$LOGFILE"
 
   log_message "Repairing Flatpak installations..."
-  flatpak repair 2>&1 | tee -a "$LOGFILE"
+  flatpak repair 2>&1 | tee -a "$LOGFILE" || log_message "flatpak repair reported problems; continuing."
 else
   log_message "Flatpak not installed. Skipping Flatpak cleanup."
 fi

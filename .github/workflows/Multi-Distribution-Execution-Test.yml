@@ -24,7 +24,7 @@ jobs:
         include:
           - name: Fedora
             image: fedora:latest
-            install: dnf install -y --refresh python3 python3-pip git bash findutils grep sudo clamav
+            install: dnf install -y --refresh python3 python3-pip git bash findutils grep sudo clamav unzip fontconfig
             scripts:
               - "./updates/update-fedora.sh"
               - "./updates/update-fedora-maintenance.sh"
@@ -34,10 +34,9 @@ jobs:
               - "./security/run-clamav-scan.sh"
               - "./security/update-clamav-signatures.sh"
               - "./security/osi-security-overview.sh"
-              - "./configs/setup-bashrc.sh"
-              - "./configs/setup-alacritty.sh"
+              - "./configs/setup-scripts/setup-bashrc.sh"
+              - "./configs/setup-scripts/setup-alacritty.sh"
               - "./utils/system-health-report.sh"
-              
 
           - name: RedHat (Rocky Linux)
             image: rockylinux/rockylinux:10
@@ -51,7 +50,7 @@ jobs:
               - "./security/run-clamav-scan.sh"
               - "./security/update-clamav-signatures.sh"
               - "./security/osi-security-overview.sh"
-              - "./configs/setup-bashrc.sh"
+              - "./configs/setup-scripts/setup-bashrc.sh"
               - "./utils/system-health-report.sh"
 
           - name: Ubuntu
@@ -66,7 +65,7 @@ jobs:
               - "./security/run-clamav-scan.sh"
               - "./security/update-clamav-signatures.sh"
               - "./security/osi-security-overview.sh"
-              - "./configs/setup-bashrc.sh"
+              - "./configs/setup-scripts/setup-bashrc.sh"
               - "./utils/system-health-report.sh"
 
           - name: Debian
@@ -79,7 +78,7 @@ jobs:
               - "./security/run-clamav-scan.sh"
               - "./security/update-clamav-signatures.sh"
               - "./security/osi-security-overview.sh"
-              - "./configs/setup-bashrc.sh"
+              - "./configs/setup-scripts/setup-bashrc.sh"
               - "./utils/system-health-report.sh"
 
           - name: Arch
@@ -92,7 +91,7 @@ jobs:
               - "./security/run-clamav-scan.sh"
               - "./security/update-clamav-signatures.sh"
               - "./security/osi-security-overview.sh"
-              - "./configs/setup-bashrc.sh"
+              - "./configs/setup-scripts/setup-bashrc.sh"
               - "./utils/system-health-report.sh"
 
     container:
@@ -110,25 +109,37 @@ jobs:
         env:
           USER: root
           CI: true
+          # These scan through the ClamAV daemon (clamd), which containers don't run and
+          # which needs a virus database that can't be downloaded reliably in CI. A scan here
+          # always ends with "Total errors" and exit code 2, so they are only syntax-checked.
+          NEEDS_CLAMD: >-
+            ./security/clamav-nightly-scan.sh
+            ./security/run-clamav-scan.sh
         run: |
-          echo "::group::Executing dedicated scripts on ${{ matrix.name }}"
           failed=0
 
           for script in ${{ join(matrix.scripts, ' ') }}; do
-            if [[ -f "$script" ]]; then
+            echo "::group::$script"
+            if [[ ! -f "$script" ]]; then
+              # A wrong path in this workflow used to skip the script silently
+              echo "::error title=Missing script::$script is listed in the workflow but does not exist"
+              failed=1
+            elif ! bash -n "$script"; then
+              echo "::error file=${script#./},title=Syntax error::bash -n failed for $script"
+              failed=1
+            elif [[ " $NEEDS_CLAMD " == *" $script "* ]]; then
+              echo "::notice file=${script#./},title=Syntax only::$script needs a running clamd and virus database; syntax-checked only"
+            else
               echo "Running: $script"
               chmod +x "$script"
-              if ! bash -n "$script"; then
-                echo "❌ Syntax error in $script"
-                failed=1
-              elif ! bash "$script"; then
-                echo "❌ Execution failed in $script"
+              if ! bash "$script"; then
+                echo "::error file=${script#./},title=Execution failed::$script exited with an error on ${{ matrix.name }}"
                 failed=1
               fi
             fi
+            echo "::endgroup::"
           done
 
-          echo "::endgroup::"
           exit $failed
 
       - name: Smoke Test All Python Scripts (.py)

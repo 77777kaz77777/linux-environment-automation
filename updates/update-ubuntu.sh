@@ -1,8 +1,9 @@
 #!/bin/bash
 # Automated system update and maintenance script tailored for Ubuntu and Debian.
 
-# Exit immediately if a command exits with a non-zero status
-set -e
+# Exit on errors, unset variables, and failures inside pipes (apt output goes through tee,
+# so without pipefail a failed apt-get would be ignored and reported as success)
+set -euo pipefail
 
 # Require root privileges
 if [ "$EUID" -ne 0 ]; then
@@ -15,7 +16,7 @@ LOG_DIR="/var/log/packageupdateslogs"
 LOGFILE="$LOG_DIR/update_ubuntu.log"
 
 # Determine non-root user for desktop notifications safely
-REAL_USER="${SUDO_USER:-$(logname 2>/dev/null || echo "$USER")}"
+REAL_USER="${SUDO_USER:-$(logname 2>/dev/null || echo "${USER:-root}")}"
 USER_ID=$(id -u "$REAL_USER" 2>/dev/null || echo "1000")
 
 # Initialize logging directory
@@ -24,7 +25,7 @@ mkdir -p "$LOG_DIR"
 # Function to write timestamped log messages to stdout and logfile
 log_info() {
   local msg="$1"
-  echo "[( $(date +'%Y-%m-%d %H:%M:%S') )] $msg" | tee -a "$LOGFILE"
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $msg" | tee -a "$LOGFILE"
 }
 
 # Safely send desktop notifications without throwing set -e errors
@@ -36,6 +37,9 @@ notify() {
       notify-send "System Update" "$message" || true
   fi
 }
+
+# Report failures instead of exiting silently
+trap 'rc=$?; log_info "ERROR: update failed (exit code $rc). See $LOGFILE"; notify "System update FAILED. Check $LOGFILE"' ERR
 
 log_info "--- Starting Ubuntu System Maintenance ---"
 
@@ -52,7 +56,7 @@ done
 
 # 2. Update APT Package Repositories & Install Upgrades
 log_info "Updating APT package index..."
-apt-get update -q -y 2>&1 | tee -a "$LOGFILE"
+apt-get update -q 2>&1 | tee -a "$LOGFILE"
 
 log_info "Performing full APT distribution upgrade..."
 # Non-interactive flag prevents prompts from stopping the script
@@ -61,7 +65,7 @@ DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y 2>&1 | tee -a "$LOGFILE"
 # 3. Update Snaps (Ubuntu Desktop)
 if command -v snap &>/dev/null; then
   log_info "Refreshing Snap packages..."
-  snap refresh 2>&1 | tee -a "$LOGFILE"
+  snap refresh 2>&1 | tee -a "$LOGFILE" || log_info "WARNING: snap refresh failed; continuing."
 else
   log_info "Snap package manager not found. Skipping..."
 fi
@@ -69,7 +73,7 @@ fi
 # 4. Update Flatpaks
 if command -v flatpak &>/dev/null; then
   log_info "Updating Flatpak applications..."
-  flatpak update -y 2>&1 | tee -a "$LOGFILE"
+  flatpak update -y 2>&1 | tee -a "$LOGFILE" || log_info "WARNING: flatpak update failed; continuing."
 
   # Also update user-level flatpaks if run via sudo
   if [ "$REAL_USER" != "root" ]; then
@@ -93,5 +97,6 @@ else
   notify "System is up to date."
 fi
 
+trap - ERR
 log_info "All updates and cleanups completed successfully!"
 echo "" >>"$LOGFILE"

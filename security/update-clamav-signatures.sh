@@ -1,31 +1,23 @@
 #!/bin/bash
 # Script to manually trigger Freshclam and update antivirus signatures.
-# Ensure the script is run with root privileges
 if [ "$EUID" -ne 0 ]; then
   echo "This script needs root privileges to stop/start systemd services."
   echo "Re-running script with sudo..."
   exec sudo "$0" "$@"
 fi
-
 echo "========================================="
 echo "       Forcing ClamAV Signature Update   "
 echo "========================================="
 echo ""
-
-# Step 1: Stop the background service to release the database lock
 echo "[1/3] Stopping clamav-freshclam service to release file locks..."
-systemctl stop clamav-freshclam
-
-# Step 2: Run the manual update
+systemctl stop clamav-freshclam.service
+# Always restart the background updater, even if the manual update fails
+trap 'systemctl start clamav-freshclam.service' EXIT
 echo "[2/3] Downloading latest malware definitions from Cisco Talos..."
 echo "------------------------------------------------------------"
 freshclam
 echo "------------------------------------------------------------"
-
-# Step 3: Restart the background service
 echo "[3/3] Restarting clamav-freshclam for automated background checks..."
-systemctl start clamav-freshclam
-
 echo ""
 echo "========================================="
 echo "       Update Sequence Complete!         "

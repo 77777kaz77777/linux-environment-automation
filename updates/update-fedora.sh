@@ -83,6 +83,13 @@ if [ -n "$GRUB_BTRFS_DIR" ] && [ -d "$GRUB_BTRFS_DIR/.git" ]; then
   # run git as the owner instead.
   as_owner() { sudo -u "$TARGET_USER" -H git -C "$GRUB_BTRFS_DIR" "$@"; }
 
+  # Older versions of this script ran git as root, leaving root-owned files
+  # (e.g. .git/FETCH_HEAD) that make the pull fail. Hand them back to the owner.
+  if [ "$TARGET_USER" != "root" ] && [ -n "$(find "$GRUB_BTRFS_DIR" ! -user "$TARGET_USER" -print -quit 2>/dev/null)" ]; then
+    log_warn "Fixing ownership of files in $GRUB_BTRFS_DIR left behind by earlier root runs..."
+    chown -R "$TARGET_USER:$(id -gn "$TARGET_USER")" "$GRUB_BTRFS_DIR"
+  fi
+
   OLD_HEAD=$(as_owner rev-parse HEAD 2>/dev/null || echo "")
   if as_owner pull --ff-only; then
     NEW_HEAD=$(as_owner rev-parse HEAD 2>/dev/null || echo "")

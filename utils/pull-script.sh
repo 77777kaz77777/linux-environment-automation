@@ -11,9 +11,11 @@ VALID_FOLDERS=(
   "configs"
   "configs/setup-scripts"
   "desktop-tweaks"
+  "maintenance"
   "provisioning"
-  "repo-management"
   "security"
+  "security/clamav"
+  "security/hardening"
   "updates"
   "utils"
 )

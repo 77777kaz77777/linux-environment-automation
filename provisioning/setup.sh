@@ -431,9 +431,12 @@ if selected GITHUB; then
       done
     fi
 
-    # 5b. Tool scripts from utils/ and security/, installed without the .sh/.py extension
+    # 5b. Tool scripts from utils/, maintenance/ and security/ (including its subfolders),
+    #     installed without the .sh/.py extension
     TOOL_ITEMS=()
-    for f in "$REPO_TMP"/utils/*.sh "$REPO_TMP"/utils/*.py "$REPO_TMP"/security/*.sh "$REPO_TMP"/security/*.py; do
+    for f in "$REPO_TMP"/utils/*.sh "$REPO_TMP"/utils/*.py \
+      "$REPO_TMP"/maintenance/*.sh \
+      "$REPO_TMP"/security/*.sh "$REPO_TMP"/security/*.py "$REPO_TMP"/security/*/*.sh; do
       [[ -f "$f" ]] || continue
       rel="${f#"$REPO_TMP"/}"
       TOOL_ITEMS+=("$rel" "$(sed -n '2s/^#[[:space:]]*//p' "$f" | cut -c1-45)" "OFF")

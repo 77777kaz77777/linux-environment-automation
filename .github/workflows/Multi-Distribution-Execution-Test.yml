@@ -27,12 +27,12 @@ jobs:
             install: dnf install -y --refresh python3 python3-pip git bash findutils grep sudo clamav unzip fontconfig
             scripts:
               - "./updates/update-fedora.sh"
-              - "./updates/update-fedora-maintenance.sh"
-              - "./updates/debloat-fedora-kde.sh"
-              - "./updates/system-cleanup.sh"
-              - "./security/clamav-nightly-scan.sh"
-              - "./security/run-clamav-scan.sh"
-              - "./security/update-clamav-signatures.sh"
+              - "./maintenance/fedora-cleanup.sh"
+              - "./maintenance/debloat-fedora-kde.sh"
+              - "./maintenance/system-cleanup.sh"
+              - "./security/clamav/clamav-nightly-scan.sh"
+              - "./security/clamav/run-clamav-scan.sh"
+              - "./security/clamav/update-clamav-signatures.sh"
               - "./security/osi-security-overview.sh"
               - "./configs/setup-scripts/setup-bashrc.sh"
               - "./configs/setup-scripts/setup-alacritty.sh"
@@ -43,12 +43,12 @@ jobs:
             install: dnf install -y epel-release && dnf install -y --refresh python3 python3-pip git bash findutils grep sudo clamav
             scripts:
               - "./updates/update-fedora.sh"
-              - "./updates/update-fedora-maintenance.sh"
-              - "./updates/debloat-fedora-kde.sh"
-              - "./updates/system-cleanup.sh"
-              - "./security/clamav-nightly-scan.sh"
-              - "./security/run-clamav-scan.sh"
-              - "./security/update-clamav-signatures.sh"
+              - "./maintenance/fedora-cleanup.sh"
+              - "./maintenance/debloat-fedora-kde.sh"
+              - "./maintenance/system-cleanup.sh"
+              - "./security/clamav/clamav-nightly-scan.sh"
+              - "./security/clamav/run-clamav-scan.sh"
+              - "./security/clamav/update-clamav-signatures.sh"
               - "./security/osi-security-overview.sh"
               - "./configs/setup-scripts/setup-bashrc.sh"
               - "./utils/system-health-report.sh"
@@ -59,11 +59,11 @@ jobs:
             scripts:
               - "./updates/update-ubuntu.sh"
               - "./updates/update-mint.sh"
-              - "./updates/clean-mint.sh"
-              - "./updates/system-cleanup.sh"
-              - "./security/clamav-nightly-scan.sh"
-              - "./security/run-clamav-scan.sh"
-              - "./security/update-clamav-signatures.sh"
+              - "./maintenance/clean-mint.sh"
+              - "./maintenance/system-cleanup.sh"
+              - "./security/clamav/clamav-nightly-scan.sh"
+              - "./security/clamav/run-clamav-scan.sh"
+              - "./security/clamav/update-clamav-signatures.sh"
               - "./security/osi-security-overview.sh"
               - "./configs/setup-scripts/setup-bashrc.sh"
               - "./utils/system-health-report.sh"
@@ -73,10 +73,10 @@ jobs:
             install: DEBIAN_FRONTEND=noninteractive apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y python3 python3-pip git bash findutils grep sudo clamav
             scripts:
               - "./updates/update-ubuntu.sh"
-              - "./updates/system-cleanup.sh"
-              - "./security/clamav-nightly-scan.sh"
-              - "./security/run-clamav-scan.sh"
-              - "./security/update-clamav-signatures.sh"
+              - "./maintenance/system-cleanup.sh"
+              - "./security/clamav/clamav-nightly-scan.sh"
+              - "./security/clamav/run-clamav-scan.sh"
+              - "./security/clamav/update-clamav-signatures.sh"
               - "./security/osi-security-overview.sh"
               - "./configs/setup-scripts/setup-bashrc.sh"
               - "./utils/system-health-report.sh"
@@ -86,10 +86,10 @@ jobs:
             install: pacman -Syu --noconfirm python git bash findutils grep sudo clamav
             scripts:
               - "./updates/update-arch.sh"
-              - "./updates/system-cleanup.sh"
-              - "./security/clamav-nightly-scan.sh"
-              - "./security/run-clamav-scan.sh"
-              - "./security/update-clamav-signatures.sh"
+              - "./maintenance/system-cleanup.sh"
+              - "./security/clamav/clamav-nightly-scan.sh"
+              - "./security/clamav/run-clamav-scan.sh"
+              - "./security/clamav/update-clamav-signatures.sh"
               - "./security/osi-security-overview.sh"
               - "./configs/setup-scripts/setup-bashrc.sh"
               - "./utils/system-health-report.sh"
@@ -113,8 +113,8 @@ jobs:
           # which needs a virus database that can't be downloaded reliably in CI. A scan here
           # always ends with "Total errors" and exit code 2, so they are only syntax-checked.
           NEEDS_CLAMD: >-
-            ./security/clamav-nightly-scan.sh
-            ./security/run-clamav-scan.sh
+            ./security/clamav/clamav-nightly-scan.sh
+            ./security/clamav/run-clamav-scan.sh
         run: |
           failed=0
 

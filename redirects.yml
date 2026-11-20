@@ -1,0 +1,24 @@
+# Old page addresses and where they moved.
+# tools/generate_redirects.py turns each entry into a redirect page after `zensical build`.
+# Add a line here whenever a script is moved or renamed.
+# (Raw download links on raw.githubusercontent.com cannot be redirected.)
+
+folders:
+  repo-management/: ''
+
+pages:
+  repo-management/apply-organization.py.md: index.md
+  repo-management/organize-scripts.py.md: index.md
+  security/clamav-nightly-scan.sh.md: security/clamav/clamav-nightly-scan.sh.md
+  security/clamav-scan.service.md: security/clamav/clamav-scan.service.md
+  security/clamav-scan.timer.md: security/clamav/clamav-scan.timer.md
+  security/fedora-kde-hardening.sh.md: security/hardening/fedora-kde-hardening.sh.md
+  security/harden-cachyos.sh.md: security/hardening/cachyos-hardening.sh.md
+  security/linux-mint-hardening-script.sh.md: security/hardening/mint-hardening.sh.md
+  security/run-clamav-scan.sh.md: security/clamav/run-clamav-scan.sh.md
+  security/setup-clamav-fedora.sh.md: security/clamav/setup-clamav-fedora.sh.md
+  security/update-clamav-signatures.sh.md: security/clamav/update-clamav-signatures.sh.md
+  updates/clean-mint.sh.md: maintenance/clean-mint.sh.md
+  updates/debloat-fedora-kde.sh.md: maintenance/debloat-fedora-kde.sh.md
+  updates/system-cleanup.sh.md: maintenance/system-cleanup.sh.md
+  updates/update-fedora-maintenance.sh.md: maintenance/fedora-cleanup.sh.md

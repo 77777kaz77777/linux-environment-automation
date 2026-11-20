@@ -56,4 +56,4 @@ apt clean
 
 echo "--- Debloat Complete! ---"
 echo "Note: Printer (CUPS) and Bluetooth services were kept intact."
-echo "      (linux-mint-hardening-script.sh disables both, if you run that too.)"
+echo "      (security/hardening/mint-hardening.sh disables both, if you run that too.)"

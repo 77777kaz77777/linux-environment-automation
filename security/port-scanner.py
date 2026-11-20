@@ -40,25 +40,34 @@ def scan_port(target, port, filter_mode, allow_reserved_ports):
     except Exception as e:
         return port, f"error: {e}"
 
+def _scanned_host(nm):
+    """Return the host key nmap stored results under.
+
+    python-nmap keys results by the resolved IP address, so looking them up
+    with a hostname (e.g. nm["example.com"]) raises KeyError.
+    """
+    hosts = nm.all_hosts()
+    return hosts[0] if hosts else None
+
+def _describe_port(info):
+    service, product, version, cpe = (info.get(k, "") for k in ("name", "product", "version", "cpe"))
+    if cpe:
+        return f"{service} ({cpe})"
+    details = f"{product} {version}".strip()
+    return f"{service} ({details})" if details else service or "Unknown"
+
 # Function to identify the service running on a specific port
 def identify_service(target, port):
     try:
         nm = nmap.PortScanner()
-        nm.scan(target, str(port))
+        nm.scan(target, str(port), arguments='-sV')
+        host = _scanned_host(nm)
 
-        if nm[target].has_tcp(port) and nm[target]['tcp'][port]['state'] == 'open':
-            service = nm[target]['tcp'][port]['name']
-            product = nm[target]['tcp'][port]['product']
-            version = nm[target]['tcp'][port]['version']
-            cpe = nm[target]['tcp'][port]['cpe']
-
-            if cpe:
-                return f"{service} ({cpe})", "TCP"
-            else:
-                return f"{service} ({product} {version})", "TCP"
-        else:
-            return "Unknown", "Unknown"
-    except Exception:
+        if host and nm[host].has_tcp(port) and nm[host]['tcp'][port]['state'] == 'open':
+            return _describe_port(nm[host]['tcp'][port]), "TCP"
+        return "Unknown", "Unknown"
+    except (nmap.PortScannerError, KeyError) as e:
+        logging.warning(f"Service detection failed for {target}:{port}: {e}")
         return "Unknown", "Unknown"
 
 # Function to check security issues on a specific port
@@ -68,13 +77,13 @@ def check_security_issues(target, port):
         nm.scan(target, arguments=f'-p {port} --script vulners,vulscan')
 
         issues = []
+        host = _scanned_host(nm)
 
-        if target in nm.all_hosts() and 'tcp' in nm[target]:
-            for output in nm[target]['tcp'][port]['script'].values():
-                if 'VULNERABILITY' in output:
-                    vulnerabilities = output['VULNERABILITY']
-                    for vulnerability in vulnerabilities:
-                        issues.append((port, vulnerability['id'], vulnerability['output']))
+        # NSE script results come back as {script_id: output_text}
+        if host and nm[host].has_tcp(port):
+            for script_id, output in nm[host]['tcp'][port].get('script', {}).items():
+                if output and output.strip():
+                    issues.append((port, script_id, output.strip()))
 
         return issues
     except Exception as e:
@@ -231,21 +240,17 @@ def save_to_file(results, filename):
 # Function to perform service detection on open ports
 def perform_service_detection(target, open_ports):
     try:
+        if not open_ports:
+            return []
         nm = nmap.PortScanner()
-        nm.scan(target, arguments='-sV')
+        # Only probe the ports already found open (much faster than nmap's default top 1000)
+        nm.scan(target, ','.join(str(p) for p in open_ports), arguments='-sV')
+        host = _scanned_host(nm)
 
         detected_services = []
         for port in open_ports:
-            if nm[target].has_tcp(port) and nm[target]['tcp'][port]['state'] == 'open':
-                service_name = nm[target]['tcp'][port]['name']
-                product = nm[target]['tcp'][port]['product']
-                version = nm[target]['tcp'][port]['version']
-                cpe = nm[target]['tcp'][port]['cpe']
-
-                if cpe:
-                    detected_services.append((port, f"{service_name} ({cpe})"))
-                else:
-                    detected_services.append((port, f"{service_name} ({product} {version})"))
+            if host and nm[host].has_tcp(port) and nm[host]['tcp'][port]['state'] == 'open':
+                detected_services.append((port, _describe_port(nm[host]['tcp'][port])))
 
         return detected_services
     except Exception as e:

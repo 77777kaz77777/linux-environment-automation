@@ -33,9 +33,12 @@ jobs:
               "configs/setup-scripts": "Dotfile Deployment Scripts",
               "desktop-tweaks": "UI customization & desktop scripts",
               "provisioning": "Workstation Bootstrap & Setup",
-              "repo-management": "LLM Metadata & Repo Organization",
+              "maintenance": "Cleanup & debloat routines",
+              "security/clamav": "ClamAV antivirus setup, scans & signatures",
+              "security/hardening": "OS hardening scripts per distro",
+              "tools": "Site generator & repository tooling",
               "security": "Antivirus & system defense utilities",
-              "updates": "Distro maintenance & update scripts",
+              "updates": "Full-system update routines per distro",
               "utils": "General standalone helper scripts"
           }
           

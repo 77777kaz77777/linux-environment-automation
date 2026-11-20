@@ -1,5 +1,6 @@
 #!/bin/bash
-# Script to manually trigger Freshclam and update antivirus signatures.
+# Force a ClamAV signature update with freshclam.
+# Installed by setup-clamav-fedora.sh as /usr/local/bin/clamsig.
 if [ "$EUID" -ne 0 ]; then
   echo "This script needs root privileges to stop/start systemd services."
   echo "Re-running script with sudo..."

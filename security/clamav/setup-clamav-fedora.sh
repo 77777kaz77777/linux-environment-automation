@@ -71,7 +71,8 @@ systemctl enable --now clamd@scan.service
 echo "Creating nightly scan script at /usr/local/bin/clamav-nightly-scan.sh..."
 cat <<'EOF' >/usr/local/bin/clamav-nightly-scan.sh
 #!/bin/bash
-# ClamAV scan script designed to run nightly (via clamav-nightly-scan.timer).
+# Nightly ClamAV scan of /home and system binaries, run by clamav-nightly-scan.timer.
+# Installed by setup-clamav-fedora.sh as /usr/local/bin/clamav-nightly-scan.sh.
 LOGFILE="/var/log/clamav/daily_scan.log"
 mkdir -p /var/log/clamav
 
@@ -92,6 +93,8 @@ chmod 755 /usr/local/bin/clamav-nightly-scan.sh
 # -----------------------------------------------------------------------------
 echo "Creating systemd service at /etc/systemd/system/clamav-nightly-scan.service..."
 cat <<'EOF' >/etc/systemd/system/clamav-nightly-scan.service
+# systemd service that runs the nightly ClamAV scan (clamav-nightly-scan.sh).
+# Installed by setup-clamav-fedora.sh as /etc/systemd/system/clamav-nightly-scan.service.
 [Unit]
 Description=Trigger multi-threaded ClamAV system scan
 Wants=clamd@scan.service
@@ -106,6 +109,8 @@ EOF
 
 echo "Creating systemd timer at /etc/systemd/system/clamav-nightly-scan.timer..."
 cat <<'EOF' >/etc/systemd/system/clamav-nightly-scan.timer
+# systemd timer that runs clamav-nightly-scan.service every day at 2:00 AM.
+# Installed by setup-clamav-fedora.sh as /etc/systemd/system/clamav-nightly-scan.timer.
 [Unit]
 Description=Run ClamAV Scan Automatically
 
@@ -124,6 +129,7 @@ echo "Creating manual scan script at /usr/local/bin/sys-scan..."
 cat <<'EOF' >/usr/local/bin/sys-scan
 #!/bin/bash
 # Manual multi-threaded ClamAV daemon scan of /home and system binaries.
+# Installed by setup-clamav-fedora.sh as /usr/local/bin/sys-scan.
 CONF_ARGS=()
 [ -f /etc/clamd.d/scan.conf ] && CONF_ARGS=(--config-file=/etc/clamd.d/scan.conf)
 
@@ -153,7 +159,8 @@ chmod 755 /usr/local/bin/sys-scan
 echo "Creating manual updater script at /usr/local/bin/clamsig..."
 cat <<'EOF' >/usr/local/bin/clamsig
 #!/bin/bash
-# Force a ClamAV signature update.
+# Force a ClamAV signature update with freshclam.
+# Installed by setup-clamav-fedora.sh as /usr/local/bin/clamsig.
 if [ "$EUID" -ne 0 ]; then
   echo "This script needs root privileges to stop/start systemd services."
   echo "Re-running script with sudo..."

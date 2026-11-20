@@ -31,9 +31,9 @@ jobs:
               - "./maintenance/debloat-fedora-kde.sh"
               - "./maintenance/system-cleanup.sh"
               - "./security/clamav/clamav-nightly-scan.sh"
-              - "./security/clamav/run-clamav-scan.sh"
-              - "./security/clamav/update-clamav-signatures.sh"
-              - "./security/osi-security-overview.sh"
+              - "./security/clamav/sys-scan.sh"
+              - "./security/clamav/clamsig.sh"
+              - "./security/network-tools/osi-security-overview.sh"
               - "./configs/setup-scripts/setup-bashrc.sh"
               - "./configs/setup-scripts/setup-alacritty.sh"
               - "./utils/system-health-report.sh"
@@ -47,9 +47,9 @@ jobs:
               - "./maintenance/debloat-fedora-kde.sh"
               - "./maintenance/system-cleanup.sh"
               - "./security/clamav/clamav-nightly-scan.sh"
-              - "./security/clamav/run-clamav-scan.sh"
-              - "./security/clamav/update-clamav-signatures.sh"
-              - "./security/osi-security-overview.sh"
+              - "./security/clamav/sys-scan.sh"
+              - "./security/clamav/clamsig.sh"
+              - "./security/network-tools/osi-security-overview.sh"
               - "./configs/setup-scripts/setup-bashrc.sh"
               - "./utils/system-health-report.sh"
 
@@ -62,9 +62,9 @@ jobs:
               - "./maintenance/clean-mint.sh"
               - "./maintenance/system-cleanup.sh"
               - "./security/clamav/clamav-nightly-scan.sh"
-              - "./security/clamav/run-clamav-scan.sh"
-              - "./security/clamav/update-clamav-signatures.sh"
-              - "./security/osi-security-overview.sh"
+              - "./security/clamav/sys-scan.sh"
+              - "./security/clamav/clamsig.sh"
+              - "./security/network-tools/osi-security-overview.sh"
               - "./configs/setup-scripts/setup-bashrc.sh"
               - "./utils/system-health-report.sh"
 
@@ -75,9 +75,9 @@ jobs:
               - "./updates/update-ubuntu.sh"
               - "./maintenance/system-cleanup.sh"
               - "./security/clamav/clamav-nightly-scan.sh"
-              - "./security/clamav/run-clamav-scan.sh"
-              - "./security/clamav/update-clamav-signatures.sh"
-              - "./security/osi-security-overview.sh"
+              - "./security/clamav/sys-scan.sh"
+              - "./security/clamav/clamsig.sh"
+              - "./security/network-tools/osi-security-overview.sh"
               - "./configs/setup-scripts/setup-bashrc.sh"
               - "./utils/system-health-report.sh"
 
@@ -88,9 +88,9 @@ jobs:
               - "./updates/update-arch.sh"
               - "./maintenance/system-cleanup.sh"
               - "./security/clamav/clamav-nightly-scan.sh"
-              - "./security/clamav/run-clamav-scan.sh"
-              - "./security/clamav/update-clamav-signatures.sh"
-              - "./security/osi-security-overview.sh"
+              - "./security/clamav/sys-scan.sh"
+              - "./security/clamav/clamsig.sh"
+              - "./security/network-tools/osi-security-overview.sh"
               - "./configs/setup-scripts/setup-bashrc.sh"
               - "./utils/system-health-report.sh"
 
@@ -114,7 +114,7 @@ jobs:
           # always ends with "Total errors" and exit code 2, so they are only syntax-checked.
           NEEDS_CLAMD: >-
             ./security/clamav/clamav-nightly-scan.sh
-            ./security/clamav/run-clamav-scan.sh
+            ./security/clamav/sys-scan.sh
         run: |
           failed=0
 

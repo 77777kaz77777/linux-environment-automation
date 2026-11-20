@@ -436,7 +436,7 @@ if selected GITHUB; then
     TOOL_ITEMS=()
     for f in "$REPO_TMP"/utils/*.sh "$REPO_TMP"/utils/*.py \
       "$REPO_TMP"/maintenance/*.sh \
-      "$REPO_TMP"/security/*.sh "$REPO_TMP"/security/*.py "$REPO_TMP"/security/*/*.sh; do
+      "$REPO_TMP"/security/*/*.sh "$REPO_TMP"/security/*/*.py; do
       [[ -f "$f" ]] || continue
       rel="${f#"$REPO_TMP"/}"
       TOOL_ITEMS+=("$rel" "$(sed -n '2s/^#[[:space:]]*//p' "$f" | cut -c1-45)" "OFF")

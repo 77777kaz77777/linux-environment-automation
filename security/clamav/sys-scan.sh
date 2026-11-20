@@ -1,5 +1,6 @@
 #!/bin/bash
 # Manual multi-threaded ClamAV daemon scan of /home and system binaries.
+# Installed by setup-clamav-fedora.sh as /usr/local/bin/sys-scan.
 CONF_ARGS=()
 [ -f /etc/clamd.d/scan.conf ] && CONF_ARGS=(--config-file=/etc/clamd.d/scan.conf)
 

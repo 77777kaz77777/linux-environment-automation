@@ -1,5 +1,6 @@
 #!/bin/bash
-# ClamAV scan script designed to run nightly (via clamav-nightly-scan.timer).
+# Nightly ClamAV scan of /home and system binaries, run by clamav-nightly-scan.timer.
+# Installed by setup-clamav-fedora.sh as /usr/local/bin/clamav-nightly-scan.sh.
 LOGFILE="/var/log/clamav/daily_scan.log"
 mkdir -p /var/log/clamav
 

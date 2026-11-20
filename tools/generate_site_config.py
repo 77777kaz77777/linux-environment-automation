@@ -53,6 +53,7 @@ FOLDER_DESCS = {
     "maintenance": "Cleanup and debloat routines: caches, orphans, unused apps.",
     "clamav": "ClamAV antivirus: setup, scheduled scans and signature updates.",
     "hardening": "Security hardening scripts for Fedora KDE, CachyOS and Linux Mint.",
+    "network-tools": "A threaded port scanner and an OSI-layer security reference.",
     "security": "Antivirus, hardening and security references.",
     "updates": "Full-system update routines per distro.",
     "utils": "Everyday helpers: VPN toggles, health report, templates.",

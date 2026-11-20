@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Automated security hardening, kernel parameter tuning, and session protection script designed for Fedora KDE.
 
 set -euo pipefail

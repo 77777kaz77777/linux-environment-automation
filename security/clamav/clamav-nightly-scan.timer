@@ -1,0 +1,11 @@
+# systemd timer that runs clamav-nightly-scan.service every day at 2:00 AM.
+# Installed by setup-clamav-fedora.sh as /etc/systemd/system/clamav-nightly-scan.timer.
+[Unit]
+Description=Run ClamAV Scan Automatically
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

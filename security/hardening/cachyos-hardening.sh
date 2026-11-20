@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-#Hardening script to apply firewall, AppArmor, and sysctl security tweaks on CachyOS.
+#!/bin/bash
+# Hardening script to apply firewall, AppArmor, and sysctl security tweaks on CachyOS.
 # ==============================================================================
 # CachyOS Security Hardening Script
 # Tailored for: Developers, Containers (Podman/Docker), and KVM Virt-Manager

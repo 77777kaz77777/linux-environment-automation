@@ -16,6 +16,7 @@ VALID_FOLDERS=(
   "security"
   "security/clamav"
   "security/hardening"
+  "security/network-tools"
   "updates"
   "utils"
 )

@@ -36,6 +36,7 @@ jobs:
               "maintenance": "Cleanup & debloat routines",
               "security/clamav": "ClamAV antivirus setup, scans & signatures",
               "security/hardening": "OS hardening scripts per distro",
+              "security/network-tools": "Port scanner & OSI security reference",
               "tools": "Site generator & repository tooling",
               "security": "Antivirus & system defense utilities",
               "updates": "Full-system update routines per distro",

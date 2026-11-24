@@ -1,6 +1,30 @@
-# 🐧 Linux-environment-automation
+# 🐧 Linux Environment Automation
 
-Centralized operations toolkit for Linux workstation provisioning, security hardening, and maintenance automation across Fedora, Arch, and Debian-based systems.
+[![Multi-distro test](https://github.com/77777kaz77777/linux-environment-automation/actions/workflows/Multi-Distribution-Execution-Test.yml/badge.svg)](https://github.com/77777kaz77777/linux-environment-automation/actions/workflows/Multi-Distribution-Execution-Test.yml)
+[![Bash lint](https://github.com/77777kaz77777/linux-environment-automation/actions/workflows/bash-lint-and-fix.yml/badge.svg)](https://github.com/77777kaz77777/linux-environment-automation/actions/workflows/bash-lint-and-fix.yml)
+[![Deploy site](https://github.com/77777kaz77777/linux-environment-automation/actions/workflows/deploy-mkdocs.yml/badge.svg)](https://github.com/77777kaz77777/linux-environment-automation/actions/workflows/deploy-mkdocs.yml)
+[![License: MIT](https://img.shields.io/github/license/77777kaz77777/linux-environment-automation)](LICENSE)
+
+Scripts and configs for provisioning, hardening, updating, and maintaining Linux workstations across Fedora, Arch, and Debian-based systems.
+
+**📖 Browse the scripts with explanations: [77777kaz77777.github.io/linux-environment-automation](https://77777kaz77777.github.io/linux-environment-automation/)**
+
+## How It's Organised
+
+| Folder | What's in it |
+| --- | --- |
+| [`provisioning/`](provisioning/) | First-run setup for new installs |
+| [`updates/`](updates/) | Per-distro update scripts |
+| [`maintenance/`](maintenance/) | Cleanup and housekeeping |
+| [`security/`](security/) | ClamAV scanning, hardening, and network tools |
+| [`configs/`](configs/) | Dotfiles and the scripts that install them |
+| [`desktop-tweaks/`](desktop-tweaks/) | KDE Plasma and desktop customisation |
+| [`utils/`](utils/) | Health report, VPN toggles, and everyday helpers |
+| [`tools/`](tools/) | Repository tooling (site generator, redirects); not end-user scripts |
+
+Every push is syntax-checked on Fedora, Rocky Linux, Ubuntu, Debian, Arch, and Alpine, and the main scripts are run on the distros they target.
+
+> **Read a script before running it.** Most of these change system settings and need `sudo`.
 
 ---
 

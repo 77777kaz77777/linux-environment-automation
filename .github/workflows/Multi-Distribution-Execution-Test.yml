@@ -93,6 +93,11 @@ jobs:
               - "./security/network-tools/osi-security-overview.sh"
               - "./configs/setup-scripts/setup-bashrc.sh"
               - "./utils/system-health-report.sh"
+          - name: Alpine
+            image: alpine:latest
+            install: apk add --no-cache python3 py3-pip git bash findutils
+            # No scripts target Alpine; it only gets the syntax and Python checks
+            scripts: []
 
     container:
       image: ${{ matrix.image }}
@@ -103,6 +108,20 @@ jobs:
 
       - name: Install Runtime Dependencies
         run: ${{ matrix.install }}
+
+      - name: Syntax-Check All Shell Scripts (.sh)
+        shell: bash
+        run: |
+          echo "::group::bash -n on every shell script"
+          failed=0
+          while IFS= read -r -d '' script; do
+            if ! bash -n "$script"; then
+              echo "::error file=${script#./},title=Syntax error::bash -n failed for $script on ${{ matrix.name }}"
+              failed=1
+            fi
+          done < <(find . -type d \( -name node_modules -o -name .git -o -name .venv \) -prune -o -type f -name "*.sh" -print0)
+          echo "::endgroup::"
+          exit $failed
 
       - name: Execute Shell Scripts
         shell: bash
